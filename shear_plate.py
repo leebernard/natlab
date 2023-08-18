@@ -17,32 +17,81 @@ def phi(x, y, z):
     return k/(2*R(z)) * (x**2 + y**2)
 
 def s(t, alpha, n):
-    # shear distance between the beams (the spacial displacement)
-    # t: plate thickness
-    # alpha: angle between principle ray and first surface, about the x-axis (typically, 45 degrees)
-    # n: index of refraction
+    '''
+    shear distance between the beams (the spacial displacement)
+    t: plate thickness
+    alpha: angle between principle ray and first surface, about the x-axis (typically, 45 degrees)
+    n: index of refraction
+
+    returns s: spacial displacement between the beams
+    '''
     return t*np.sin(2*alpha)/np.sqrt(n**2 - np.sin(alpha)**2)
 
 def theta(delta, alpha, n):
-    # angle of secondary reflected beam ray, about the y-axis. Assumes primary ray angle is 0
-    # this angle is caused by the shear plate wedge
-    # delta is the angle of the wedge. If delta=0, then theta=0
-    # alpha is angle between principle ray and first surface, about the x-axis (typically, 45 degrees)
-    # n: index of refraction
+    '''
+    angle of secondary reflected beam ray, about the y-axis. Assumes primary ray angle is 0
+    this angle is caused by the shear plate wedge
+    delta: the angle of the wedge. If delta=0, then theta=0
+    alpha: angle between principle ray and first surface, about the x-axis (typically, 45 degrees)
+    n: index of refraction
+
+    returns
+    theta: angle of the secondary beam
+    '''
     return 2*delta*np.sqrt(n**2 - np.sin(alpha)**2)
 
 
 def transform_to_second(x, y, z, theta, s):
+    '''
+    transform to secondary beam coordinate system
+    Parameters
+    ----------
+    x
+    y
+    z
+    theta: angle of the secondary beam, relative to the primary
+    s: path length difference
+
+    Returns
+    -------
+
+    '''
     x_prime = x - s
     y_z_prime = np.matmul(np.array([[1, theta], [-theta, 1]]), np.array([y, z]))
     return np.stack([x_prime, *y_z_prime])
 
 
 def path_length_diff(t, alpha, n):
+    '''
+    Parameters
+    ----------
+    t: plate thickness (meters)
+    alpha: angle of shear plate
+    n: index of refraction
+
+    Returns
+    -------
+    Path length difference for the two beams
+    '''
     return 2*t*np.sqrt(n**2 - np.sin(alpha)**2)
 
 
 def pattern(x, y, z, delta, alpha, n, t):
+    '''
+    Parameters
+    ----------
+    x
+    y
+    z
+    delta: angle of the wedge
+    alpha: angle of shear plate
+    n: index of refraction
+    t: thickness of plate
+
+    Returns
+    -------
+
+    '''
     primes = transform_to_second(x, y, z, theta(delta, alpha, n),  s(t, alpha, n))
     x_prime = primes[0]
     y_prime = primes[1]

@@ -90,7 +90,8 @@ def prism_raytrace(x,y,z,dx,dy,dz,lam=1.0e-6,b=25.4e-3,lam0=1.5e-6,x0=0.,z0=0.):
     return x,y,z,dx,dy,dz,s0
 
 
-def spot(x00=0., y00=0., z00=0., x11=0., theta_1=45., theta_2=30., Fn=12., efl1=0.1016, efl2=0.27224, lam=1.5e-6, N=203, step=8,scl1=1.,scl2=1.,M1_shift=[],M2_shift=[],diffract_focus=True,through_dichroic=False,verbose=True):
+def spot(x00=0., y00=0., z00=0., x11=0., theta_1=45., theta_2=30., Fn=12., efl1=0.1016, efl2=0.27224, lam=1.5e-6, N=203,
+         step=8, scl1=1., scl2=1., M1_shift=[], M2_shift=[], diffract_focus=True, through_dichroic=False, verbose=True):
     """
       sending focused light through an 2 OAP relay
         (default units are degrees and inches)

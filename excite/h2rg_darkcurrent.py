@@ -90,7 +90,7 @@ fig.suptitle('Exposure of %.2f minutes'  %(observation_duration/60))
 '''
 
 # repeat the above, but for various temperatures
-bins = np.linspace(0, 1.2, 350)
+bins = np.linspace(0, .3, 350)
 fig, ax = plt.subplots(len(temp_data_cube), 2, figsize=(8, 12))
 for n, temp_data in enumerate(temp_data_cube):
     print('Temperature %.2f'  %temp_curve[n])
@@ -109,8 +109,10 @@ for n, temp_data in enumerate(temp_data_cube):
     ax[n, 1].set_xlabel('Dark Current (e-/s), T=%.1f' % temp_curve[n])
     ax[n, 1].set_xlim
 # fig.suptitle('Exposure of %.2f minutes'  %(observation_duration/60))
+fig.suptitle('Pixel maps and histograms of dark current rates (e/s)')
+
 plt.tight_layout()
-plt.savefig('test.png')
+plt.savefig('test2.png')
 
 
 '''
