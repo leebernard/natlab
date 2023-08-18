@@ -27,6 +27,7 @@ x,y,z,dx,dy,dz,s0 = spot(lam=0.6328e-6,step=5)
 plt.plot(-(x[1:]-x0[0]),y[1:]-y0[0],'o')
 print("Offset [mm]:",-(x[0]-x0[0])*1.e3) # about 0.92 mm
 
+
 # Note that the code assumes that the center of the prism is a distance F1 from the surface of OAP2.
 # You could also get the angle of deflection after the prism and use that downstream:
 
@@ -47,8 +48,9 @@ s = -x[0]/dx[0]   # where
 z_detector = z[0]+s*dz[0]   # 2.58 mm as above
 
 '''
-This is useful, because it also gives the offset at different distances s along the beam, e.g. corresponding to fold mirrors along the way.  However, what you really
-want for these mirrors is the offset relative to the channel center wavelength.  Say we're looking at Channel 1 and define the central wavelength to be 1.65 microns:
+This is useful, because it also gives the offset at different distances s along the beam, e.g. corresponding to fold 
+mirrors along the way.  However, what you really want for these mirrors is the offset relative to the channel center 
+wavelength.  Say we're looking at Channel 1 and define the central wavelength to be 1.65 microns:
 '''
 
 x0,y0,z0,dx0,dy0,dz0,s00 = spot(lam=1.65e-6,step=6)
@@ -63,6 +65,13 @@ s1 = -x0[0]/dx0[0]
 z_detector_center = z0[0]+s1*dz0[0]
 print((z_detector-z_detector_center)*1.e3)  # 5.82 mm
 
+
+# final fold mirror
+# position at 1.5-micron (default), step=7 is surface of final fold mirror
+x0,y0,z0,dx0,dy0,dz0,s00 = spot(step=7)
+# now specify 632.8 nm
+x,y,z,dx,dy,dz,s0 = spot(lam=0.6328e-6,step=7)
+print("Offset [mm]:", -(z[0]-z0[0])*1.e3) # about 0.92 mm
 '''
 In this way, you could work out offsets for each fold mirror that allow you to center them using the He-Ne laser with 
 offsets that would center the channel central wavelength. Of course, at the detector,
