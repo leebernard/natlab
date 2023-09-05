@@ -1,12 +1,22 @@
 """
 This is for a mapping function between the Fine Guidance System (FGS) and the Slit Viewing Camera (SVC).
-This should include the mapping function, and a procedure for calibrating the mapping funciton
+This should include the mapping function, and a procedure for calibrating the mapping function.
+
+This should also include a routine for finding the slit in the SVC image, and mapping the location of the slit to the
+FGS field of view. It should also draw a target reticule indicating the center of the slit.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
-from skimage.transform import rescale
+if hasattr(sys, 'ps1'):
+    import matplotlib
+    print('Pycharm interactive detected. Chaning to TkAgg')
+    matplotlib.use('TkAgg')
+
+
+# from skimage.transform import rescale
 
 ps_fgs = 3.15  # plate scale of the fgs
 ps_svc = 8.5  # plate scale of the svc
@@ -14,7 +24,7 @@ ps_svc = 8.5  # plate scale of the svc
 # open data here
 from astropy.io import fits
 from astropy.utils.data import download_file
-image_file = download_file('http://data.astropy.org/tutorials/FITS-images/HorseHead.fits', cache=True )
+image_file = download_file('http://data.astropy.org/tutorials/FITS-images/HorseHead.fits', cache=True)
 fgs_im = fits.getdata(image_file)
 
 
@@ -22,7 +32,7 @@ fgs_im = fits.getdata(image_file)
 # rotate clockwise 90 degrees
 # rotate and downscale the fgs image to the scv scale
 scale = ps_fgs/ps_svc
-sub_im = rescale(np.rot90(fgs_im, axes=(1, 0)), scale, preserve_range=True, anti_aliasing=True)
+sub_im = rescale(np.rot90(fgs_im, axes=(0, 1)), scale, preserve_range=True, anti_aliasing=True)
 
 
 # pad the downscaled image to the size of the svc image, with zeros
@@ -42,9 +52,9 @@ postpend_length = fgs_im.shape[1] - offset[1] - sub_im.shape[1]
 postpend = np.zeros((sub_im.shape[0], postpend_length))
 sub_im = np.hstack((prepend, sub_im, postpend))
 
-fig, ax = plt.subplots(1, 2)
-ax[0].imshow(fgs_im, cmap='gray')
+fig, ax = plt.subplots(1, 2, figsize=(8,6))
+pcm = ax[0].imshow(fgs_im, cmap='gray')
 ax[1].imshow(sub_im, cmap='gray')
-fig.colorbar()
+
 
 
