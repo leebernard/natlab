@@ -1,16 +1,34 @@
 import numpy as np
 import re
+
+from astroquery.simbad import Simbad
 # import csv
 
-debug = True
+debug = False
 
 path = '/home/lee/natlab/excite_targets/'
 
 file = 'simbad_engineering_2023-09-04.tsv'
 
-data = np.loadtxt(path+file, dtype='str', delimiter='\t', skiprows=7, max_rows=21)
+id_file = 'engineering_2023-09-04.txt'
 
-data_list = data.tolist()
+with open(path+id_file) as file:
+    id_list = [line.rstrip() for line in file]
+
+excite_query = Simbad()
+excite_query.add_votable_fields('typed_id')
+excite_query.remove_votable_fields('coordinates')
+excite_query.add_votable_fields('ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)')
+excite_query.add_votable_fields('otype', 'otypes')
+result_table = excite_query.query_objects(id_list)
+
+if debug:
+    excite_query.get_votable_fields()
+    result_table.pprint_all()
+
+# data = np.loadtxt(path+file, dtype='str', delimiter='\t', skiprows=7, max_rows=21)
+#
+# data_list = data.tolist()
 
 # re_pattern = r'(V\*)|(Ir\*)|(Er\*)|(Ro\*)|(Pu\*)'
 var_flags = r'V\*|Ir\*|Er\*|Ro\*|Pu\*'
@@ -18,32 +36,30 @@ bin_flags = r'El\*|EB\*'
 var_pattern = re.compile(var_flags)
 bin_pattern = re.compile(bin_flags)
 
-debug = False
+debug = True
 is_variable = []
 is_binary = []
-for row in data_list:
+for row in result_table:
     if debug:
         print(row)
-    check = bool(re.search(var_pattern, ''.join(row)))
+    check = bool(re.search(var_pattern, row['OTYPES']))
     if debug:
         print('Checking if variable', check)
     is_variable.append(check)
 
-    check = bool(re.search(bin_pattern, ''.join(row)))
+    check = bool(re.search(bin_pattern, row['OTYPES']))
     if debug:
         print('Checking if binary variable', check)
     is_binary.append(check)
 
 # clean up some memeory
-del data_list
+# del data_list
 is_variable = np.asarray(is_variable)
 is_binary = np.asarray(is_binary)
 
-debug = True
+validated_targets = result_table[~is_variable]
 
-validated_targets = data[~is_variable]
-
-binary_variable = data[is_binary]
+binary_variable = result_table[is_binary]
 
 
 
