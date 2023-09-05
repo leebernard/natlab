@@ -29,6 +29,28 @@ def retrieve_targetdata(filename,
     return result_table
 
 
+def validate_targets(target_table, otype_flags, debug=False, inclusive_filter=True):
+
+    pattern = re.compile('|'.join(otype_flags))
+    is_variable = []
+    for row in target_table:
+        if debug:
+            print(row)
+
+        check = bool(re.search(pattern, row['OTYPES']))
+        if debug:
+            print('Checking if star matches flag', check)
+        is_variable.append(check)
+
+    is_valid = np.asarray(is_variable)
+    if inclusive_filter is False:
+        # return the targets that Do Not have the flags
+        return result_table[~is_valid]
+    else:
+        # return targets that have the flags
+        return result_table[is_valid]
+
+
 path = '/home/lee/natlab/excite_targets/'
 
 file = 'simbad_engineering_2023-09-04.tsv'
