@@ -1,6 +1,7 @@
 from numpy import arange,zeros,sqrt,dot,newaxis,sin,cos,array,round,pi,arctan2,abs,sign,exp,where
 
-def shear_plate(Rc=1.e5,R=21.5,Rs=50.,T=6.35,wedge_ang=18.,N=203,n_idx=1.46,lam=632.8e-6,wfe=0.,wfe_phi=0.,w0=21.1,alpha=45.,atype='coma',nripple=10,acenter=[0.,0.],plate=-1):
+def shear_plate(Rc=1.e5,R=21.5,Rs=50.,T=6.35,wedge_ang=18.,N=203,n_idx=1.46,lam=632.8e-6,wfe=0.,wfe_phi=0.,w0=21.1,
+                alpha=45.,atype='coma',nripple=10,acenter=[0.,0.],plate=-1):
     """
       SI254P: 10-25.4 mm beam diameter (R=21.5), ang=18, T=6.35 (plate=0)
       SI100P: 5-10 mm beam diameter (R=11.), ang=40, T=2.6 (plate=1)
@@ -38,7 +39,7 @@ def shear_plate(Rc=1.e5,R=21.5,Rs=50.,T=6.35,wedge_ang=18.,N=203,n_idx=1.46,lam=
     else: bdiv = sign(Rc)*arctan2(R,sign(Rc)*Rc)
     print (f"Beam divergence at edge: {bdiv:.2e}")
 
-    alpha *= pi/180.
+    alpha *= pi/180.  # convert to radians
     shear = T*sin(2*alpha)/sqrt(n_idx**2-sin(alpha)**2)
     th = 2*wedge_ang*pi/180/3600*sqrt(n_idx**2-sin(alpha)**2)
     print (f"Expected line spacing: {lam/th:.3f}")
