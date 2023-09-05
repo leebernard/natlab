@@ -8,30 +8,26 @@ from astroquery.simbad import Simbad
 debug = False
 
 
-def retrieve_targetdata(filename,
-                        add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', 'otype', 'otypes'],
-                        remove_fields=['coordinates'],
-                        debug=False):
-
-    with open(filename) as file:
-        id_list = [line.rstrip() for line in file]
+def retrieve_targetdata(id_list, add_fields, remove_fields, debug=False):
 
     query = Simbad()
     query.remove_votable_fields(*remove_fields)
     query.add_votable_fields(*add_fields)
     result_table = query.query_objects(id_list)
 
+
     if debug:
-        if debug:
-            query.get_votable_fields()
-            result_table.pprint_all()
+        query.get_votable_fields()
+        result_table.pprint_all()
 
     return result_table
 
 
-def validate_targets(target_table, otype_flags, debug=False, inclusive_filter=True):
+def is_valid(target_table, otype_regex, debug=False):
 
-    pattern = re.compile('|'.join(otype_flags))
+    pattern = re.compile(otype_regex)
+    if debug:
+        print('Pattern', pattern.pattern)
     is_variable = []
     for row in target_table:
         if debug:
@@ -42,13 +38,19 @@ def validate_targets(target_table, otype_flags, debug=False, inclusive_filter=Tr
             print('Checking if star matches flag', check)
         is_variable.append(check)
 
-    is_valid = np.asarray(is_variable)
-    if inclusive_filter is False:
-        # return the targets that Do Not have the flags
-        return result_table[~is_valid]
-    else:
-        # return targets that have the flags
-        return result_table[is_valid]
+    return np.asarray(is_variable)
+
+
+def validate_targets(target_list, otype_flags,
+                     add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', 'otype',
+                                 'otypes'],
+                     remove_fields=['coordinates'],
+                     debug=False
+                     ):
+
+    data_table = retrieve_targetdata(target_list, add_fields=add_fields, remove_fields=remove_fields, debug=debug)
+
+    return is_valid(data_table, otype_flags, debug=debug)
 
 
 path = '/home/lee/natlab/excite_targets/'
@@ -57,11 +59,10 @@ file = 'simbad_engineering_2023-09-04.tsv'
 
 id_file = 'engineering_2023-09-04.txt'
 
-test = retrieve_targetdata(path+id_file)
-
-
 with open(path+id_file) as file:
     excite_list = [line.rstrip() for line in file]
+
+
 
 excite_query = Simbad()
 excite_query.add_votable_fields('typed_id')
@@ -84,7 +85,10 @@ bin_flags = r'El\*|EB\*'
 var_pattern = re.compile(var_flags)
 bin_pattern = re.compile(bin_flags)
 
-debug = True
+
+test = validate_targets(excite_list, var_flags)
+
+debug = False
 is_variable = []
 is_binary = []
 for row in result_table:
