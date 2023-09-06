@@ -68,6 +68,33 @@ def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
                                  'otypes'],
                      remove_fields=['coordinates'],
                      debug=False):
+    '''
+    Pass this function a list of identifiers, and it will validate whether the targets are variable stars.
+
+    It uses the list of target identifiers to query the Simbad database, and check if any of the targets are variable
+    stars. It then returns a bool array.
+
+    Parameters
+    ----------
+    target_list : list of strings
+        List of target identifiers to check for if they are variable.
+    otype_flags : str, optional
+        A string to be compiled as a regex pattern. This regex pattern searches the 'otypes' field for matches.
+    add_fields : list of strings, optional
+        Fields to be added to the Simbad data dump
+    remove_fields : list of strings, optional
+        Fields to be removed from the Simbad data dump
+    debug : bool, optional
+        turns on debugging mode
+
+    Returns
+    -------
+    a bool numpy array, where True means the target is a variable star according to Simbad.
+
+    Notes
+    -----
+    See http://simbad.cds.unistra.fr/guide/sim-fscript.htx for flag and field identifiers.
+    '''
     return validate_targets(target_list, otype_flags, add_fields=add_fields, remove_fields=remove_fields, debug=debug)
 
 if __name__ == "__main__":
