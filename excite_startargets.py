@@ -1,6 +1,6 @@
 import numpy as np
 import re
-from astropy.table import setdiff
+# from astropy.table import setdiff
 
 from astroquery.simbad import Simbad
 # import csv
@@ -53,6 +53,14 @@ def validate_targets(target_list, otype_flags,
     return is_valid(data_table, otype_flags, debug=debug)
 
 
+def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
+                     add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', 'otype',
+                                 'otypes'],
+                     remove_fields=['coordinates'],
+                     debug=False):
+    return validate_targets(target_list, otype_flags, add_fields=add_fields, remove_fields=remove_fields, debug=debug)
+
+
 path = '/home/lee/natlab/excite_targets/'
 
 file = 'simbad_engineering_2023-09-04.tsv'
@@ -86,7 +94,7 @@ var_pattern = re.compile(var_flags)
 bin_pattern = re.compile(bin_flags)
 
 
-test = validate_targets(excite_list, var_flags)
+test2 = validate_targets(excite_list, var_flags)
 
 debug = False
 is_variable = []
