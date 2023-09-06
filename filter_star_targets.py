@@ -125,6 +125,8 @@ if __name__ == "__main__":
 
     # is_target_variable() is a wrapper function combines the above two functions:
     shortcut_to_is_variable_star = is_target_variable(target_list)
+    print('Ran sucessfully!')
+    print(shortcut_to_is_variable_star)
     print(is_variable_star == shortcut_to_is_variable_star)
 
 
