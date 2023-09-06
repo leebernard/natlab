@@ -7,7 +7,19 @@ from astroquery.simbad import Simbad
 
 
 def retrieve_targetdata(id_list, add_fields, remove_fields, debug=False):
+    '''
 
+    Parameters
+    ----------
+    id_list: a list of star identifiers
+    add_fields:
+    remove_fields
+    debug
+
+    Returns
+    -------
+    A astropy table containing data retrieved from Simbad
+    '''
     query = Simbad()
     query.remove_votable_fields(*remove_fields)
     query.add_votable_fields(*add_fields)
@@ -83,9 +95,9 @@ if __name__ == "__main__":
     is_variable_star = is_valid(target_table, var_flags)
     is_binary_variable = is_valid(target_table, bin_flags)
 
-    # is_target_variable() combines the above two functions:
-    test3 = is_target_variable(target_list)
-
+    # is_target_variable() is a wrapper function combines the above two functions:
+    shortcut_to_is_variable_star = is_target_variable(target_list)
+    print(is_variable_star == shortcut_to_is_variable_star)
 
 
 # # HIP ID, Vmag, RA (deg), DEC (deg), AZ (deg), EL (deg)
