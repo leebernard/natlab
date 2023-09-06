@@ -89,7 +89,8 @@ def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
 
     Returns
     -------
-    a bool numpy array, where True means the target is a variable star according to Simbad.
+    A bool numpy array, where True means the corresponding target is a variable star according to Simbad.
+    Returned array corresponds positionally to the input array.
 
     Notes
     -----
