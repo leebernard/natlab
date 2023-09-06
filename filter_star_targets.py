@@ -5,8 +5,6 @@ import re
 from astroquery.simbad import Simbad
 # import csv
 
-debug = False
-
 
 def retrieve_targetdata(id_list, add_fields, remove_fields, debug=False):
 
@@ -60,68 +58,33 @@ def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
                      debug=False):
     return validate_targets(target_list, otype_flags, add_fields=add_fields, remove_fields=remove_fields, debug=debug)
 
+if __name__ == "__main__":
+    debug = False
 
-path = '/home/lee/natlab/excite_targets/'
+    path = '/home/lee/natlab/excite_targets/'
+    # file = 'simbad_engineering_2023-09-04.tsv'
 
-file = 'simbad_engineering_2023-09-04.tsv'
+    id_file = 'engineering_2023-09-04.txt'
 
-id_file = 'engineering_2023-09-04.txt'
+    with open(path+id_file) as file:
+        target_list = [line.rstrip() for line in file]
 
-with open(path+id_file) as file:
-    excite_list = [line.rstrip() for line in file]
-
-
-
-excite_query = Simbad()
-excite_query.add_votable_fields('typed_id')
-excite_query.remove_votable_fields('coordinates')
-excite_query.add_votable_fields('ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)')
-excite_query.add_votable_fields('otype', 'otypes')
-result_table = excite_query.query_objects(excite_list)
-
-if debug:
-    excite_query.get_votable_fields()
-    result_table.pprint_all()
-
-# data = np.loadtxt(path+file, dtype='str', delimiter='\t', skiprows=7, max_rows=21)
-#
-# data_list = data.tolist()
-
-# re_pattern = r'(V\*)|(Ir\*)|(Er\*)|(Ro\*)|(Pu\*)'
-var_flags = r'V\*|Ir\*|Er\*|Ro\*|Pu\*'
-bin_flags = r'El\*|EB\*'
-var_pattern = re.compile(var_flags)
-bin_pattern = re.compile(bin_flags)
-
-
-test2 = validate_targets(excite_list, var_flags)
-
-debug = False
-is_variable = []
-is_binary = []
-for row in result_table:
+    # retrieve a table of target data from Simbad
+    target_table = retrieve_targetdata(target_list,
+                                       add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', 'otype','otypes'],
+                                       remove_fields=['coordinates'])
     if debug:
-        print(row)
+        target_table.pprint_all()
 
-    check = bool(re.search(var_pattern, row['OTYPES']))
-    if debug:
-        print('Checking if star is variable', check)
-    is_variable.append(check)
+    # generate a binary filter according to variable flags
+    var_flags = r'V\*|Ir\*|Er\*|Ro\*|Pu\*'
+    bin_flags = r'El\*|EB\*'
 
-    check = bool(re.search(bin_pattern, row['OTYPES']))
-    if debug:
-        print('Checking if star is binary variable', check)
-    is_binary.append(check)
+    is_variable_star = is_valid(target_table, var_flags)
+    is_binary_variable = is_valid(target_table, bin_flags)
 
-# clean up some memeory
-# del data_list
-is_variable = np.asarray(is_variable)
-is_binary = np.asarray(is_binary)
-
-validated_targets = result_table[~is_variable]
-
-binary_variable = result_table[is_binary]
-
+    # is_target_variable() combines the above two functions:
+    test3 = is_target_variable(target_list)
 
 
 
