@@ -61,18 +61,6 @@ def is_valid(target_table, flag_regex, field='OTYPES', debug=False):
     return np.asarray(is_variable)
 
 
-def validate_targets(target_list, otype_flags,
-                     add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', '', 'otype',
-                                 'otypes'],
-                     remove_fields=['coordinates'],
-                     debug=False
-                     ):
-
-    data_table = retrieve_targetdata(target_list, add_fields=add_fields, remove_fields=remove_fields, debug=debug)
-
-    return is_valid(data_table, otype_flags, debug=debug)
-
-
 def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
                      add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', 'otype',
                                  'otypes'],
@@ -106,7 +94,12 @@ def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
     -----
     See http://simbad.cds.unistra.fr/guide/sim-fscript.htx for flag and field identifiers.
     '''
-    return validate_targets(target_list, otype_flags, add_fields=add_fields, remove_fields=remove_fields, debug=debug)
+
+    data_table = retrieve_targetdata(target_list, add_fields=add_fields, remove_fields=remove_fields, debug=debug)
+
+    return is_valid(data_table, otype_flags, debug=debug)
+
+
 
 if __name__ == "__main__":
     debug = True
