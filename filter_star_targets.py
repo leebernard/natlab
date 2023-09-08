@@ -106,7 +106,7 @@ def retrieve_spectral_types(target_list, debug=False, **keywords):
     return np.asarray(data_table['SP_TYPE'])
 
 
-def retrive_sptype_and_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
+def retrieve_sptype_and_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
                                 add_fields=['typed_id',
                                             'ra(d;A;ICRS;J2017.5;2000)',
                                             'dec(d;D;ICRS;J2017.5;2000)',
@@ -153,6 +153,11 @@ if __name__ == "__main__":
     print(shortcut_to_is_variable_star)
     print(is_variable_star == shortcut_to_is_variable_star)
 
+    spectral_type = retrieve_spectral_types(target_list)
+
+    is_variable_star2, spectral_type2 = retrieve_sptype_and_variable(target_list)
+    print('Same variable star result:', is_variable_star == is_variable_star2)
+    print('Same spectral types:', spectral_type == spectral_type2)
 
 # # HIP ID, Vmag, RA (deg), DEC (deg), AZ (deg), EL (deg)
 # hip_id, Vmag, Ra, DEC, AZ, EL = np.loadtxt(path+file, delimiter=',').transpose()
