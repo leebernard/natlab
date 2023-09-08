@@ -15,11 +15,11 @@ def retrieve_targetdata(id_list, add_fields, remove_fields, debug=False, **keywo
 
     Parameters
     ----------
-    id_list : str list
+    id_list : list, str
         a list of star identifiers
-    add_fields : str list
+    add_fields : list, str
         Simbad field identifiers to be added to the query
-    remove_fields : str list
+    remove_fields : list, str
         Simbad field identifiers to be removed from the query
     debug : bool
     keywords : keywords to pass through to the query_objects() method
@@ -91,13 +91,13 @@ def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
 
     Parameters
     ----------
-    target_list : list of strings
+    target_list : list, str
         List of target identifiers to check for if they are variable.
     otype_flags : str, optional
         A string to be compiled as a regex pattern. This regex pattern searches the 'otypes' field for matches.
-    add_fields : list of strings, optional
+    add_fields : list, str, optional
         Fields to be added to the Simbad data dump
-    remove_fields : list of strings, optional
+    remove_fields : list, str, optional
         Fields to be removed from the Simbad data dump
     debug : bool, optional
         turns on debugging mode
