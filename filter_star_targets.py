@@ -100,6 +100,26 @@ def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
     return is_valid(data_table, otype_flags, debug=debug)
 
 
+def retrieve_spectral_types(target_list, debug=False, **keywords):
+    data_table = retrieve_targetdata(target_list, add_fields=['sp'], remove_fields=['coordiantes'], debug=debug, **keywords)
+
+    return np.asarray(data_table['SP_TYPE'])
+
+
+def retrive_sptype_and_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
+                                add_fields=['typed_id',
+                                            'ra(d;A;ICRS;J2017.5;2000)',
+                                            'dec(d;D;ICRS;J2017.5;2000)',
+                                            'sp',
+                                            'otype',
+                                            'otypes'],
+                                remove_fields=['coordinates'],
+                                debug=False):
+    data_table = retrieve_targetdata(target_list, add_fields=add_fields, remove_fields=remove_fields, debug=debug)
+
+    return is_valid(data_table, otype_flags, debug=debug), np.asarray(data_table['SP_TYPE'])
+
+
 
 if __name__ == "__main__":
     debug = True
