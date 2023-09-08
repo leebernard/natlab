@@ -6,36 +6,46 @@ from astroquery.simbad import Simbad
 # import csv
 
 
-def retrieve_targetdata(id_list, add_fields, remove_fields, debug=False):
+def retrieve_targetdata(id_list, add_fields, remove_fields, debug=False, **keywords):
     '''
+    Queries Simbad for object data, using a list of identifiers. The data is returned as an astropy table, with table
+    columns corresponding to the fields queried from Simbad. The default fields are 'main_id' (the id Simbad uses) and
+    'coordinates' (a shorthand for all fields involving Ra and Dec, including Ra/Dec in sexagesimal format, error
+    information, and bibcodes).
 
     Parameters
     ----------
-    id_list: a list of star identifiers
-    add_fields:
-    remove_fields
-    debug
+    id_list : str list
+        a list of star identifiers
+    add_fields : str list
+        Simbad field identifiers to be added to the query
+    remove_fields : str list
+        Simbad field identifiers to be removed from the query
+    debug : bool
+    keywords : keywords to pass through to the query_objects() method
 
     Returns
     -------
-    A astropy table containing data retrieved from Simbad
+    An astropy table containing data retrieved from Simbad.
     '''
     query = Simbad()
     query.remove_votable_fields(*remove_fields)
     query.add_votable_fields(*add_fields)
-    result_table = query.query_objects(id_list)
+    result_table = query.query_objects(id_list, **keywords)
 
 
     if debug:
+        print('current votablle fields')
         query.get_votable_fields()
+        print('retrieved data table')
         result_table.pprint_all()
 
     return result_table
 
 
-def is_valid(target_table, otype_regex, debug=False):
+def is_valid(target_table, flag_regex, field='OTYPES', debug=False):
 
-    pattern = re.compile(otype_regex)
+    pattern = re.compile(flag_regex)
     if debug:
         print('Pattern', pattern.pattern)
     is_variable = []
@@ -43,7 +53,7 @@ def is_valid(target_table, otype_regex, debug=False):
         if debug:
             print(row)
 
-        check = bool(re.search(pattern, row['OTYPES']))
+        check = bool(re.search(pattern, row[field]))
         if debug:
             print('Checking if star matches flag', check)
         is_variable.append(check)
@@ -52,7 +62,7 @@ def is_valid(target_table, otype_regex, debug=False):
 
 
 def validate_targets(target_list, otype_flags,
-                     add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', 'otype',
+                     add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', '', 'otype',
                                  'otypes'],
                      remove_fields=['coordinates'],
                      debug=False
@@ -99,7 +109,7 @@ def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
     return validate_targets(target_list, otype_flags, add_fields=add_fields, remove_fields=remove_fields, debug=debug)
 
 if __name__ == "__main__":
-    debug = False
+    debug = True
 
     path = '/home/lee/natlab/excite_targets/'
     # file = 'simbad_engineering_2023-09-04.tsv'
@@ -111,12 +121,13 @@ if __name__ == "__main__":
 
     # retrieve a table of target data from Simbad
     target_table = retrieve_targetdata(target_list,
-                                       add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', 'otype','otypes'],
+                                       add_fields=['typed_id', 'ra(d;A;ICRS;J2017.5;2000)', 'dec(d;D;ICRS;J2017.5;2000)', 'flux(V)', 'sp','otype','otypes'],
                                        remove_fields=['coordinates'])
     if debug:
         target_table.pprint_all()
 
     # generate a binary filter according to variable flags
+    spect_class_filter = r'V'  # any 'V' luminosity star is main sequence
     var_flags = r'V\*|Ir\*|Er\*|Ro\*|Pu\*'
     bin_flags = r'El\*|EB\*'
 
