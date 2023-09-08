@@ -44,7 +44,24 @@ def retrieve_targetdata(id_list, add_fields, remove_fields, debug=False, **keywo
 
 
 def is_valid(target_table, flag_regex, field='OTYPES', debug=False):
+    '''
+    Checks if the regex pattern matches any entries in the given field.
+    Uses re.search(pattern) to search the given field for matches.
 
+    Parameters
+    ----------
+    target_table : `~astropy.table.Table`
+        Table of object data retrieved from Simbad
+    flag_regex : str
+        String to be compiled into a regex pattern
+    field : str
+        identifier of the Simbad field to be searched
+    debug : bool
+
+    Returns
+    -------
+    Bool array. True means a match was found.
+    '''
     pattern = re.compile(flag_regex)
     if debug:
         print('Pattern', pattern.pattern)
