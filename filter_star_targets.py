@@ -84,7 +84,8 @@ def is_target_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|Pu\*',
                      remove_fields=['coordinates'],
                      debug=False):
     '''
-    Pass this function a list of identifiers, and it will validate whether the targets are variable stars.
+    Wrapper function for retrieve_targetdata() and is_valid(). Pass this function a list of identifiers, and it will
+    validate whether the targets are variable stars.
 
     It uses the list of target identifiers to query the Simbad database, and check if any of the targets are variable
     stars. It then returns a bool array.
