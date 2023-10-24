@@ -12,8 +12,19 @@ path_length = 101.6*4 + 272.2  # approx internal path length of spectrograph
 
 # angular field of view.
 # assuming the field of view is centered on the final fold mirror, there is 2 mm of space
-fov = np.degrees(2/path_length)*60  # fov in arminutes
+tolerance = 2/path_length  # tolerance in radians
+fov = np.degrees(tolerance)*60  # fov in arminutes
 print(fov, 'arcminutes')  # about 10 arcminutes fov. This is not accounting for oap effects.
+
+# distance from slit to D1 dichroic is about 135 mm
+d1_distance = 135
+
+print('Centering tolerance on D1:', tolerance*d1_distance)
+
+
+tiptilt_distance = 300  # estimated distance from slit to tip-tilt mirror
+
+print('Centering tolerance on tip-tilt mirror:', tolerance*tiptilt_distance)
 
 
 

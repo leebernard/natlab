@@ -139,14 +139,14 @@ def spot(x00=0., y00=0., z00=0., x11=0., theta_1=45., theta_2=30., Fn=12., efl1=
 
     #
     # fill the telescope aperture, take rays to x00,y00,z00
-    Rs,Rt=0.095,0.25
-    x = (arange(N)-N//2)*Rt/(N//2)
+    Rs,Rt=0.095,0.25  # radius of secondary, radius of primary
+    x = (arange(N)-N//2)*Rt/(N//2)  # generate sample locations
     xx = x[:,newaxis] + 0*x[newaxis,:]
     yy = 0*x[:,newaxis] + x[newaxis,:]
     rad2 = xx**2+yy**2
-    j = (rad2>Rs**2)*(rad2<=Rt**2)
-    z = xx[j]; y=yy[j]; x=2*Rt*Fn+0*y
-    xx=0;yy=0;rad2=0;j=0
+    j = (rad2>Rs**2)*(rad2<=Rt**2)  # filter out locations not in the telescope aperture
+    z = xx[j]; y=yy[j]; x=2*Rt*Fn+0*y  # set locations for position -1 (telescope aperture)
+    xx=0;yy=0;rad2=0;j=0  # reset variables
     xs,ys,zs = 1.*x,1.*y,1.*z
 
     if (verbose): print (f"Initial Beam Size: {z.max()-z.min():.4f}, {y.max()-y.min():.4f} ({2*Rt:.4f})")
@@ -162,8 +162,8 @@ def spot(x00=0., y00=0., z00=0., x11=0., theta_1=45., theta_2=30., Fn=12., efl1=
     if (step==-1): return x,y,z,dx,dy,dz,0*dz
 
     # miror focal lengths parameters
-    th1,th2 = theta_1*pi/180, theta_2*pi/180.
-    f1 = 0.5*efl1*(1+cos(th1))
+    th1,th2 = theta_1*pi/180, theta_2*pi/180.  # convert to radians
+    f1 = 0.5*efl1*(1+cos(th1))  # define focal length of parent parabola
     f2 = 0.5*efl2*(1+cos(th2))
 
     # to send in the laser directly:

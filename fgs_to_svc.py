@@ -18,7 +18,7 @@ if hasattr(sys, 'ps1'):
 
 # from skimage.transform import rescale
 
-ps_fgs = 3.15  # plate scale of the fgs
+ps_fgs = 3.45  # plate scale of the fgs
 ps_svc = 8.5  # plate scale of the svc
 
 # open data here
@@ -32,7 +32,7 @@ fgs_im = fits.getdata(image_file)
 # rotate clockwise 90 degrees
 # rotate and downscale the fgs image to the scv scale
 scale = ps_fgs/ps_svc
-sub_im = rescale(np.rot90(fgs_im, axes=(0, 1)), scale, preserve_range=True, anti_aliasing=True)
+sub_im = np.rescale(np.rot90(fgs_im, axes=(0, 1)), scale, preserve_range=True, anti_aliasing=True)
 
 
 # pad the downscaled image to the size of the svc image, with zeros
