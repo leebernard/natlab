@@ -3,6 +3,8 @@ This is for testing querying the NASA Exoplanet Archive using astroquery.
 '''
 from astroquery.ipac.nexsci.nasa_exoplanet_archive import NasaExoplanetArchive
 
+NasaExoplanetArchive.TAP_TABLES
+
 test = NasaExoplanetArchive.query_object("WASP-18 b", table='pscomppars', select='*')
 
 test.colnames
@@ -15,4 +17,11 @@ test2 = NasaExoplanetArchive.query_object("WASP-18 b", table='pscomppars', selec
 
 test2.pprint_all()
 
-test3 = NasaExoplanetArchive.query_criteria_async(table='pscomppars', select=cols_needed)
+criteria = 'pl_trandep > 0.5 and sy_vmag < 11'
+test3 = NasaExoplanetArchive.query_criteria(table='pscomppars', select=cols_needed, where=criteria)
+
+print(len(test3))
+
+test3['pl_trandep']
+
+
