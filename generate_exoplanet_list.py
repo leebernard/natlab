@@ -9,11 +9,11 @@ from astropy.time import Time
 verbose = False
 
 cols_needed = ('pl_name, hostname, hip_name, sy_vmag, sy_kmag, pl_bmassj, pl_bmasse, ra, dec, '
-               'pl_orbper, pl_orbpererr1, pl_orbpererr2, pl_orbperstr,'
+               'pl_orbper, pl_orbpererr1, pl_orbpererr2,'
                'pl_trandep, pl_trandeperr1, pl_trandeperr2, pl_trandeplim')
 
 criteria = 'pl_trandep > 0.0 and sy_vmag < 12 and sy_kmag < 11 and pl_orbper < 7'
-exotable = NasaExoplanetArchive.query_criteria_async(table='pscomppars', select=cols_needed, where=criteria)
+exotable = NasaExoplanetArchive.query_criteria_async(table='pscomppars', select=cols_needed, where=criteria).to_table()
 
 test_loc = SkyCoord(exotable['ra'][0]*u.deg, exotable['dec'][0]*u.deg, frame='icrs')
 
@@ -85,7 +85,7 @@ is_valid = valid_exo_cube.sum(axis=0) > min_time_obsv/samples_per_hour
 # min_sep = (180 - 50)*u.deg  # minimum target separation from the sun in degrees
 # has_min_seperation = np.array([sun_loc.separation(SkyCoord(target['ra'], target['dec'], frame='icrs')) > min_sep for target in exotable])
 
-valid_exo_table = exotable[is_valid]
+valid_exotable = exotable[is_valid]
 
 verbose = True
 if verbose:
@@ -98,6 +98,22 @@ if verbose:
 fig, ax = plt.subplots(tight_layout=True)
 
 ax.hist(exotable['pl_trandep'].data, bins=100)
+
+
+'''Compare my list to Peter's list'''
+list_path = '/home/lee/natlab/excite_targets/flight_20240906_140000_UT-6phase3A.csv'
+
+from astropy.io import ascii
+from astropy.table import join
+
+# open Peter's table
+peter_table = ascii.read(list_path, header_start=11, delimiter=',')
+
+print(peter_table['System'])
+print('compared to my list:')
+print(valid_exotable['hostname'])
+
+
 
 
 
