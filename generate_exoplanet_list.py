@@ -28,7 +28,7 @@ start_time = Time('2024-9-6 14:00:00') - utc_offset
 end_time = Time('2024-9-7 08:00:00') - utc_offset
 flight_time = end_time - start_time  # this gives flight time in days
 flight_time = flight_time.to_value(u.hour)  # convert flight time to hours
-samples_per_hour = 1
+samples_per_hour = 2
 min_time_obsv = 4  # in hours
 
 # generate time samples on a per-hour basis, with the frequency determined by samples_per_hour
@@ -78,7 +78,10 @@ is_in_elevation = (alt_upper_lim > alt) & (alt > alt_lower_lim)
 # combine all the validation checks
 valid_exo_cube = is_in_elevation * (is_anti_sun + is_night[:, None])
 # find out which exoplanet candidates survived
-is_valid = valid_exo_cube.sum(axis=0) > min_time_obsv/samples_per_hour
+print('time instances valid', valid_exo_cube.sum(axis=0))
+print('amounut of time observable', valid_exo_cube.sum(axis=0)/samples_per_hour)
+
+is_valid = valid_exo_cube.sum(axis=0) > min_time_obsv*samples_per_hour
 
 '''I need a way of calculating how long each valid target is observable'''
 
