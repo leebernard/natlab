@@ -76,14 +76,18 @@ is_in_elevation = (alt_upper_lim > alt) & (alt > alt_lower_lim)
 # valid_exotable = [exoplanet for (exoplanet, valid) in zip(exotable, is_anti_sun*is_in_elevation) if valid]
 # the above is cute, but wrong. the correct way is below
 # combine all the validation checks
-valid_exo_cube = is_in_elevation * (is_anti_sun + is_night[:, None])
+valid_altaz_cube = is_in_elevation * (is_anti_sun + is_night[:, None])
 # find out which exoplanet candidates survived
-print('time instances valid', valid_exo_cube.sum(axis=0))
-print('amounut of time observable', valid_exo_cube.sum(axis=0)/samples_per_hour)
+print('time instances valid', valid_altaz_cube.sum(axis=0))
+print('amounut of time observable', valid_altaz_cube.sum(axis=0)/samples_per_hour)
 
-is_valid = valid_exo_cube.sum(axis=0) > min_time_obsv*samples_per_hour
+is_valid = valid_altaz_cube.sum(axis=0) > min_time_obsv*samples_per_hour
 
-'''I need a way of calculating how long each valid target is observable'''
+'''
+I need a way of calculating how long each valid target is observable.
+More accurately, I need to calculate when each target enters and exits observability.
+If I sample the observing time frequently enough, that provides enter and exit times to a reasonable approximation.
+'''
 
 # min_sep = (180 - 50)*u.deg  # minimum target separation from the sun in degrees
 # has_min_seperation = np.array([sun_loc.separation(SkyCoord(target['ra'], target['dec'], frame='icrs')) > min_sep for target in exotable])
