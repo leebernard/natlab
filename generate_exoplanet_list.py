@@ -28,7 +28,7 @@ start_time = Time('2024-9-6 14:00:00') - utc_offset
 end_time = Time('2024-9-7 08:00:00') - utc_offset
 flight_time = end_time - start_time  # this gives flight time in days
 flight_time = flight_time.to_value(u.hour)  # convert flight time to hours
-samples_per_hour = 2
+samples_per_hour = 12
 min_time_obsv = 4  # in hours
 
 # generate time samples on a per-hour basis, with the frequency determined by samples_per_hour
@@ -62,10 +62,11 @@ exo_skycoord = exo_skycoord.transpose()
 # sun_altaz.alt > -12
 # get_az = np.vectorize(lambda x: x.az.value)
 # exo_az = get_az(exo_skycoord)
-exo_altaz_cube = np.array([[[altaz.alt/u.deg, altaz.az/u.deg] for altaz in altaz_list] for altaz_list in exo_skycoord])
+# extract the altitude and azimuth cooridnates, because arrays of objects sucks
+altaz_cube = np.array([[[altaz.alt/u.deg, altaz.az/u.deg] for altaz in altaz_list] for altaz_list in exo_skycoord])
 
-alt = exo_altaz_cube[:,:, 0]
-az = exo_altaz_cube[:,:,1]
+alt = altaz_cube[:,:, 0]
+az = altaz_cube[:,:,1]
 is_anti_sun = (az < max_az[0]) & (az > min_az[0])
 
 is_night = ~ (sun_altaz.alt > -12*u.deg)
@@ -76,18 +77,20 @@ is_in_elevation = (alt_upper_lim > alt) & (alt > alt_lower_lim)
 # valid_exotable = [exoplanet for (exoplanet, valid) in zip(exotable, is_anti_sun*is_in_elevation) if valid]
 # the above is cute, but wrong. the correct way is below
 # combine all the validation checks
-valid_altaz_cube = is_in_elevation * (is_anti_sun + is_night[:, None])
+valid_altaz = is_in_elevation * (is_anti_sun + is_night[:, None])
 # find out which exoplanet candidates survived
-print('time instances valid', valid_altaz_cube.sum(axis=0))
-print('amounut of time observable', valid_altaz_cube.sum(axis=0)/samples_per_hour)
+print('time instances valid', valid_altaz.sum(axis=0))
+print('amounut of time observable', valid_altaz.sum(axis=0)/samples_per_hour)
 
-is_valid = valid_altaz_cube.sum(axis=0) > min_time_obsv*samples_per_hour
+is_valid = valid_altaz.sum(axis=0) > min_time_obsv*samples_per_hour
 
 '''
 I need a way of calculating how long each valid target is observable.
 More accurately, I need to calculate when each target enters and exits observability.
 If I sample the observing time frequently enough, that provides enter and exit times to a reasonable approximation.
 '''
+valid_altaz_cube = altaz_cube*valid_altaz[..., None]
+valid_altaz_cube = valid_altaz_cube[:, is_valid, :]
 
 # min_sep = (180 - 50)*u.deg  # minimum target separation from the sun in degrees
 # has_min_seperation = np.array([sun_loc.separation(SkyCoord(target['ra'], target['dec'], frame='icrs')) > min_sep for target in exotable])
