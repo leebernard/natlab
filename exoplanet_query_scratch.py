@@ -1,6 +1,7 @@
 '''
 This is for testing querying the NASA Exoplanet Archive using astroquery.
 '''
+import numpy as np
 from astroquery.ipac.nexsci.nasa_exoplanet_archive import NasaExoplanetArchive
 
 import astropy.units as u
@@ -81,5 +82,14 @@ test_bool = (5*u.deg < test_array) & (test_array < 50*u.deg)
 test_array = np.linspace(1, 180, num=50)
 
 test_bool = 5 < test_array < 50
+
+arr = np.array([[[1,2], [0, 3],[4,0], [0,5]],
+                [[0,0], [0,0], [6,7], [0,0]],
+                [[0, 0], [8, 9],[10, 11], [13, 0]]])
+
+test = (arr != 0 ).argmax(axis=1)
+
+
+arr[np.arange(arr.shape[0]), test[:,0], :]
 
 

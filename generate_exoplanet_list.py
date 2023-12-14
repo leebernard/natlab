@@ -56,8 +56,9 @@ max_az = anti_sun + range
 
 exo_skycoord = np.array([SkyCoord(target['ra']*u.deg, target['dec']*u.deg, frame='icrs').
                          transform_to(AltAz(obstime=sept_hours, location=fort_sumner)) for target in exotable])
-# transpose hours and targets
-exo_skycoord = exo_skycoord.transpose()
+
+# # transpose the array, for efficiency
+# exo_skycoord = exo_skycoord.transpose()
 
 # sun_altaz.alt > -12
 # get_az = np.vectorize(lambda x: x.az.value)
@@ -77,20 +78,28 @@ is_in_elevation = (alt_upper_lim > alt) & (alt > alt_lower_lim)
 # valid_exotable = [exoplanet for (exoplanet, valid) in zip(exotable, is_anti_sun*is_in_elevation) if valid]
 # the above is cute, but wrong. the correct way is below
 # combine all the validation checks
-valid_altaz = is_in_elevation * (is_anti_sun + is_night[:, None])
+valid_altaz = is_in_elevation * (is_anti_sun + is_night[None, :])
 # find out which exoplanet candidates survived
-print('time instances valid', valid_altaz.sum(axis=0))
-print('amounut of time observable', valid_altaz.sum(axis=0)/samples_per_hour)
+if verbose:
+    print('time instances valid', valid_altaz.sum(axis=1))
+    print('amounut of time observable', valid_altaz.sum(axis=1)/samples_per_hour)
 
-is_valid = valid_altaz.sum(axis=0) > min_time_obsv*samples_per_hour
+# check if the sum of valid time samples meets the minimum observing time
+is_valid = valid_altaz.sum(axis=1) > min_time_obsv*samples_per_hour
 
 '''
 I need a way of calculating how long each valid target is observable.
 More accurately, I need to calculate when each target enters and exits observability.
 If I sample the observing time frequently enough, that provides enter and exit times to a reasonable approximation.
 '''
+
+# set all non-valid altaz values to zero
 valid_altaz_cube = altaz_cube*valid_altaz[..., None]
-valid_altaz_cube = valid_altaz_cube[:, is_valid, :]
+# remove all targets that don't meet criteria
+valid_altaz_cube = valid_altaz_cube[is_valid, ...]
+
+test = (valid_altaz_cube != 0 ).argmax(axis=1)
+test2 = valid_altaz_cube[np.arange(valid_altaz_cube.shape[0]), test[:, 0], :]
 
 # min_sep = (180 - 50)*u.deg  # minimum target separation from the sun in degrees
 # has_min_seperation = np.array([sun_loc.separation(SkyCoord(target['ra'], target['dec'], frame='icrs')) > min_sep for target in exotable])
@@ -100,7 +109,7 @@ valid_exotable = exotable[is_valid]
 verbose = True
 if verbose:
     print("Number of planets in database:", len(exotable))
-    print('Number of planets observable between', start_time, 'and', end_time, ':', is_valid.sum())
+    print('Number of planets observable between', start_time, 'and', end_time, ':', len(valid_exotable))
 
 if verbose:
     print(valid_exotable['pl_trandep'])
