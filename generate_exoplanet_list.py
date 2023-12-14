@@ -44,11 +44,12 @@ if verbose:
     print(f"sun's Altitude = {sun_altaz.alt}")
     print(f"sun's Azimuth = {sun_altaz.az}")
 
-anti_sun = sun_altaz.az/u.deg - 180
-range = 50
 
-min_az = anti_sun - range
-max_az = anti_sun + range
+range = 50  # plus/minus from the antisun postion
+
+anti_sun = Longitude(sun_altaz.az - 180*u.deg)  # using astropy Longitude to take advantage of wrapping
+min_az = Longitude(anti_sun - range*u.deg)/u.deg
+# max_az = Longitude(anti_sun + range)/u.deg
 
 # astronomical twilight is defined as the Sun being 12-18° below the horizon. <-18° is complete darkness
 # 12° below the horizon (-12°) is the start of observable conditions.
@@ -68,7 +69,11 @@ altaz_cube = np.array([[[altaz.alt/u.deg, altaz.az/u.deg] for altaz in altaz_lis
 
 alt = altaz_cube[:,:, 0]
 az = altaz_cube[:,:,1]
-is_anti_sun = (az < max_az) & (az > min_az)
+
+# check if the az is within 100 degrees of min_antisun
+# test = az - min_az
+# test2 = (az - min_az)%360
+is_anti_sun = (az - min_az)%360 < range*2
 
 is_night = ~ (sun_altaz.alt > -12*u.deg)
 

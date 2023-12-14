@@ -93,3 +93,6 @@ test = (arr != 0 ).argmax(axis=1)
 arr[np.arange(arr.shape[0]), test[:,0], :]
 
 
+
+
+
