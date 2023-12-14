@@ -68,7 +68,7 @@ altaz_cube = np.array([[[altaz.alt/u.deg, altaz.az/u.deg] for altaz in altaz_lis
 
 alt = altaz_cube[:,:, 0]
 az = altaz_cube[:,:,1]
-is_anti_sun = (az < max_az[0]) & (az > min_az[0])
+is_anti_sun = (az < max_az) & (az > min_az)
 
 is_night = ~ (sun_altaz.alt > -12*u.deg)
 
