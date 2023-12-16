@@ -29,7 +29,8 @@ end_time = Time('2024-9-7 08:00:00') - utc_offset
 flight_time = end_time - start_time  # this gives flight time in days
 flight_time = flight_time.to_value(u.hour)  # convert flight time to hours
 samples_per_hour = 12
-min_time_obsv = 4  # in hours
+min_day_obsv = 2  # in hours
+min_night_obsv = 4  # in hours
 
 # generate time samples on a per-hour basis, with the frequency determined by samples_per_hour
 sept_hours = np.linspace(start_time, end_time, num=round(flight_time * samples_per_hour))
@@ -83,33 +84,20 @@ is_in_elevation = (alt_upper_lim > alt) & (alt > alt_lower_lim)
 # valid_exotable = [exoplanet for (exoplanet, valid) in zip(exotable, is_anti_sun*is_in_elevation) if valid]
 # the above is cute, but wrong. the correct way is below
 # combine all the validation checks
-valid_altaz = is_in_elevation * (is_anti_sun + is_night[None, :])
+valid_daytime_altaz = is_in_elevation * is_anti_sun * ~is_night[None, :]
+
+valid_nighttime_altaz = is_in_elevation * is_night[None, :]
+
+is_day_valid = valid_daytime_altaz.sum(axis=1) > min_day_obsv*samples_per_hour
+is_night_valid = valid_nighttime_altaz.sum(axis=1) > min_night_obsv*samples_per_hour
 # find out which exoplanet candidates survived
+verbose = True
 if verbose:
-    print('time instances valid', valid_altaz.sum(axis=1))
-    print('amounut of time observable', valid_altaz.sum(axis=1)/samples_per_hour)
+    print('Number observable during the day', is_day_valid.sum())
+    print('Number observable during the night', is_night_valid.sum())
 
-# check if the sum of valid time samples meets the minimum observing time
-is_valid = valid_altaz.sum(axis=1) > min_time_obsv*samples_per_hour
 
-'''
-I need a way of calculating how long each valid target is observable.
-More accurately, I need to calculate when each target enters and exits observability.
-If I sample the observing time frequently enough, that provides enter and exit times to a reasonable approximation.
-'''
-
-# set all non-valid altaz values to zero
-valid_altaz_cube = altaz_cube*valid_altaz[..., None]
-# remove all targets that don't meet criteria
-valid_altaz_cube = valid_altaz_cube[is_valid, ...]
-
-test = (valid_altaz_cube != 0 ).argmax(axis=1)
-test2 = valid_altaz_cube[np.arange(valid_altaz_cube.shape[0]), test[:, 0], :]
-
-# min_sep = (180 - 50)*u.deg  # minimum target separation from the sun in degrees
-# has_min_seperation = np.array([sun_loc.separation(SkyCoord(target['ra'], target['dec'], frame='icrs')) > min_sep for target in exotable])
-
-valid_exotable = exotable[is_valid]
+valid_exotable = exotable[is_day_valid+is_night_valid]
 
 verbose = True
 if verbose:
