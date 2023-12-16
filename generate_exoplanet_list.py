@@ -107,6 +107,12 @@ if verbose:
 if verbose:
     print(valid_exotable['pl_trandep'])
 
+# extract the windows at which the valid targets are observable
+test = (valid_daytime_altaz != 0 ).argmax(axis=1)
+# test2 = valid_altaz_cube[np.arange(valid_altaz_cube.shape[0]), test[:, 0], :]
+
+
+
 fig, ax = plt.subplots(tight_layout=True)
 
 ax.hist(exotable['pl_trandep'].data, bins=100)
