@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import astropy.units as u
 import numpy as np
+import re
 
 from astroquery.ipac.nexsci.nasa_exoplanet_archive import NasaExoplanetArchive
 from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_sun, Longitude, Latitude
 from astropy.time import Time
+
 
 verbose = False
 
@@ -65,7 +67,7 @@ exo_skycoord = np.array([SkyCoord(target['ra']*u.deg, target['dec']*u.deg, frame
 # sun_altaz.alt > -12
 # get_az = np.vectorize(lambda x: x.az.value)
 # exo_az = get_az(exo_skycoord)
-# extract the altitude and azimuth cooridnates, because arrays of objects sucks
+# extract the altitude and azimuth cooridnates, because arrays of objects suck
 altaz_cube = np.array([[[altaz.alt/u.deg, altaz.az/u.deg] for altaz in altaz_list] for altaz_list in exo_skycoord])
 
 alt = altaz_cube[:,:, 0]
@@ -84,12 +86,12 @@ is_in_elevation = (alt_upper_lim > alt) & (alt > alt_lower_lim)
 # valid_exotable = [exoplanet for (exoplanet, valid) in zip(exotable, is_anti_sun*is_in_elevation) if valid]
 # the above is cute, but wrong. the correct way is below
 # combine all the validation checks
-valid_daytime_altaz = is_in_elevation * is_anti_sun * ~is_night[None, :]
+is_valid_daytime_altaz = is_in_elevation * is_anti_sun * ~is_night[None, :]
 
-valid_nighttime_altaz = is_in_elevation * is_night[None, :]
+is_valid_nighttime_altaz = is_in_elevation * is_night[None, :]
 
-is_day_valid = valid_daytime_altaz.sum(axis=1) > min_day_obsv*samples_per_hour
-is_night_valid = valid_nighttime_altaz.sum(axis=1) > min_night_obsv*samples_per_hour
+is_day_valid = is_valid_daytime_altaz.sum(axis=1) > min_day_obsv*samples_per_hour
+is_night_valid = is_valid_nighttime_altaz.sum(axis=1) > min_night_obsv*samples_per_hour
 # find out which exoplanet candidates survived
 verbose = True
 if verbose:
@@ -99,6 +101,20 @@ if verbose:
 
 valid_exotable = exotable[is_day_valid+is_night_valid]
 
+# extract the start and stop times of observability
+# test = is_valid_daytime_altaz[is_day_valid]
+#
+# # extract the windows at which the valid targets are observable
+# test = (is_valid_daytime_altaz[is_day_valid] != 0 ).argmax(axis=1)
+
+daytime_start_times = sept_hours[(is_valid_daytime_altaz[is_day_valid] != 0 ).argmax(axis=1)]
+
+# test = is_valid_nighttime_altaz[is_night_valid]
+
+daytime_end_times = sept_hours[(np.flip(is_valid_daytime_altaz[is_day_valid], axis=1) != 0 ).argmax(axis=1)]
+# should I combine daytime and nighttime hours?
+
+
 verbose = True
 if verbose:
     print("Number of planets in database:", len(exotable))
@@ -107,9 +123,7 @@ if verbose:
 if verbose:
     print(valid_exotable['pl_trandep'])
 
-# extract the windows at which the valid targets are observable
-test = (valid_daytime_altaz != 0 ).argmax(axis=1)
-# test2 = valid_altaz_cube[np.arange(valid_altaz_cube.shape[0]), test[:, 0], :]
+
 
 
 
@@ -131,7 +145,35 @@ print(peter_table['System'])
 print('compared to my list:')
 print(valid_exotable['hostname'])
 
+# quick and dirty comparision between the lists
 
+
+peter_id_nums = []
+for id in peter_table['System']:
+    # extract number identifers from the string
+    str = re.search(r'(?<![A-Za-z])\d+', id).group(0)
+    peter_id_nums.append(str.lstrip('0'))
+
+# id_nums = np.array(id_nums)
+# test = np.unique(id_nums, return_counts=True)
+
+has_match = []
+for id in peter_id_nums:
+    match = 0
+    for exohost in valid_exotable['hostname']:
+        match += id in exohost
+    has_match.append(match)
+
+has_match = np.array(has_match)
+
+test = has_match>0
+
+print('number of matches:', has_match.sum())
+
+
+'''write out the results'''
+
+valid_exotable.write('target_list.csv', format='csv')
 
 
 
