@@ -111,9 +111,11 @@ daytime_start_times = sept_hours[(is_valid_daytime_altaz[is_day_valid] != 0 ).ar
 
 # test = is_valid_nighttime_altaz[is_night_valid]
 
-daytime_end_times = sept_hours[(np.flip(is_valid_daytime_altaz[is_day_valid], axis=1) != 0 ).argmax(axis=1)]
+daytime_end_times = np.flip(sept_hours)[(np.flip(is_valid_daytime_altaz[is_day_valid], axis=1) != 0 ).argmax(axis=1)]
 # should I combine daytime and nighttime hours?
 
+# test = daytime_end_times - daytime_start_times
+# test = test.to_value(u.hour)
 
 verbose = True
 if verbose:
