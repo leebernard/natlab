@@ -10,6 +10,8 @@ from astropy.time import Time
 
 verbose = False
 
+
+'''query database for potential exoplanet targets'''
 cols_needed = ('pl_name, hostname, hip_name, sy_vmag, sy_kmag, pl_bmassj, pl_bmasse, ra, dec, '
                'pl_orbper, pl_orbpererr1, pl_orbpererr2,'
                'pl_trandep, pl_trandeperr1, pl_trandeperr2, pl_trandeplim')
@@ -17,8 +19,10 @@ cols_needed = ('pl_name, hostname, hip_name, sy_vmag, sy_kmag, pl_bmassj, pl_bma
 criteria = 'pl_trandep > 0.0 and sy_vmag < 12 and sy_kmag < 11 and pl_orbper < 7'
 exotable = NasaExoplanetArchive.query_criteria_async(table='pscomppars', select=cols_needed, where=criteria).to_table()
 
-test_loc = SkyCoord(exotable['ra'][0]*u.deg, exotable['dec'][0]*u.deg, frame='icrs')
+# test_loc = SkyCoord(exotable['ra'][0]*u.deg, exotable['dec'][0]*u.deg, frame='icrs')
 
+
+''' set constants'''
 # location geo:34.401944,-104.194722, 4032 ft (1220 m)
 fort_sumner = EarthLocation(lat=34.401944*u.deg, lon=-104.194722*u.deg, height=1220*u.m)
 alt_upper_lim = 57  # *u.deg
@@ -34,25 +38,24 @@ samples_per_hour = 12
 min_day_obsv = 2  # in hours
 min_night_obsv = 4  # in hours
 
+
+'''Filter the table according to observability'''
 # generate time samples on a per-hour basis, with the frequency determined by samples_per_hour
 sept_hours = np.linspace(start_time, end_time, num=round(flight_time * samples_per_hour))
 
 sun_loc = get_sun(sept_hours)
 
-# seperation should be +- 50 degrees from anti-sun azimuth
-# sun_altaz = sun_loc.transform_to(AltAz(obstime=time, location=fort_sumner))
 sun_altaz = sun_loc.transform_to(AltAz(obstime=sept_hours, location=fort_sumner))
 if verbose:
     print('sun location', sun_loc)
     print(f"sun's Altitude = {sun_altaz.alt}")
     print(f"sun's Azimuth = {sun_altaz.az}")
 
-
+# seperation should be +- 50 degrees from anti-sun azimuth
 range = 50  # plus/minus from the antisun postion
 
 anti_sun = Longitude(sun_altaz.az - 180*u.deg)  # using astropy Longitude to take advantage of wrapping
 min_az = Longitude(anti_sun - range*u.deg)/u.deg
-# max_az = Longitude(anti_sun + range)/u.deg
 
 # astronomical twilight is defined as the Sun being 12-18° below the horizon. <-18° is complete darkness
 # 12° below the horizon (-12°) is the start of observable conditions.
@@ -73,14 +76,13 @@ altaz_cube = np.array([[[altaz.alt/u.deg, altaz.az/u.deg] for altaz in altaz_lis
 alt = altaz_cube[:,:, 0]
 az = altaz_cube[:,:,1]
 
-# check if the az is within 100 degrees of min_antisun
-# test = az - min_az
-# test2 = (az - min_az)%360
-is_anti_sun = (az - min_az)%360 < range*2
+# validation checks: all should be bool arrays
 
-is_night = ~ (sun_altaz.alt > -12*u.deg)
+is_anti_sun = (az - min_az)%360 < range*2  # check if the az is within 100 degrees of min_antisun
 
-is_in_elevation = (alt_upper_lim > alt) & (alt > alt_lower_lim)
+is_night = ~ (sun_altaz.alt > -12*u.deg)  # check if it's astronomical night
+
+is_in_elevation = (alt_upper_lim > alt) & (alt > alt_lower_lim)  # check if the telescope can point at the target
 
 
 # valid_exotable = [exoplanet for (exoplanet, valid) in zip(exotable, is_anti_sun*is_in_elevation) if valid]
@@ -107,6 +109,8 @@ valid_exotable = exotable[is_day_valid+is_night_valid]
 # # extract the windows at which the valid targets are observable
 # test = (is_valid_daytime_altaz[is_day_valid] != 0 ).argmax(axis=1)
 
+valid_sept_hours = sept_hours[is_day_valid+is_night_valid]
+
 daytime_start_times = sept_hours[(is_valid_daytime_altaz[is_day_valid] != 0 ).argmax(axis=1)]
 
 # test = is_valid_nighttime_altaz[is_night_valid]
@@ -124,6 +128,8 @@ nighttime_end_times = np.flip(sept_hours)[(np.fliplr(is_valid_nighttime_altaz)[i
 
 # test = nighttime_end_times - nighttime_start_times
 # print(test.to_value(u.hour))
+
+
 
 
 verbose = True
