@@ -111,13 +111,13 @@ valid_exotable = exotable[is_valid]
 # test = (is_valid_daytime_altaz[is_day_valid] != 0 ).argmax(axis=1)
 
 
-daytime_start_times = np.ma.masked_array(sept_hours[is_valid_daytime_altaz.argmax(axis=1)], mask=is_day_valid)
+daytime_start_times = np.ma.masked_array(sept_hours[is_valid_daytime_altaz.argmax(axis=1)], mask=~is_day_valid, fill_value=np.ma.masked)
 
 
 
 # test = is_valid_nighttime_altaz[is_night_valid]
 
-daytime_end_times = np.ma.masked_array(np.flip(sept_hours)[(np.fliplr(is_valid_daytime_altaz) != 0 ).argmax(axis=1)], mask=is_day_valid)
+daytime_end_times = np.ma.masked_array(np.flip(sept_hours)[(np.fliplr(is_valid_daytime_altaz) != 0 ).argmax(axis=1)], mask=~is_day_valid, fill_value=np.ma.masked)
 # should I combine daytime and nighttime hours?
 
 test = daytime_end_times - daytime_start_times
