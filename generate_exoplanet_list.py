@@ -92,6 +92,7 @@ is_valid_daytime_altaz = is_in_elevation * is_anti_sun * ~is_night[None, :]
 
 is_valid_nighttime_altaz = is_in_elevation * is_night[None, :]
 
+# check if the observation window is long enough
 is_day_valid = is_valid_daytime_altaz.sum(axis=1) > min_day_obsv*samples_per_hour
 is_night_valid = is_valid_nighttime_altaz.sum(axis=1) > min_night_obsv*samples_per_hour
 # find out which exoplanet candidates survived
@@ -100,8 +101,8 @@ if verbose:
     print('Number observable during the day', is_day_valid.sum())
     print('Number observable during the night', is_night_valid.sum())
 
-
-valid_exotable = exotable[is_day_valid+is_night_valid]
+is_valid = is_day_valid+is_night_valid
+valid_exotable = exotable[is_valid]
 
 # extract the start and stop times of observability
 # test = is_valid_daytime_altaz[is_day_valid]
@@ -109,22 +110,22 @@ valid_exotable = exotable[is_day_valid+is_night_valid]
 # # extract the windows at which the valid targets are observable
 # test = (is_valid_daytime_altaz[is_day_valid] != 0 ).argmax(axis=1)
 
-valid_sept_hours = sept_hours[is_day_valid+is_night_valid]
 
-daytime_start_times = sept_hours[(is_valid_daytime_altaz[is_day_valid] != 0 ).argmax(axis=1)]
+daytime_start_times = np.ma.masked_array(sept_hours[is_valid_daytime_altaz.argmax(axis=1)], mask=is_day_valid)
+
+
 
 # test = is_valid_nighttime_altaz[is_night_valid]
 
-daytime_end_times = np.flip(sept_hours)[(np.fliplr(is_valid_daytime_altaz[is_day_valid]) != 0 ).argmax(axis=1)]
+daytime_end_times = np.ma.masked_array(np.flip(sept_hours)[(np.fliplr(is_valid_daytime_altaz) != 0 ).argmax(axis=1)], mask=is_day_valid)
 # should I combine daytime and nighttime hours?
 
-# test = daytime_end_times - daytime_start_times
-# test = test.to_value(u.hour)
+test = daytime_end_times - daytime_start_times
+test = test.to_value(u.hour)
 # print(test)
 
-nighttime_start_times = sept_hours[(is_valid_nighttime_altaz[is_night_valid] != 0).argmax(axis=1)]
-
-nighttime_end_times = np.flip(sept_hours)[(np.fliplr(is_valid_nighttime_altaz)[is_night_valid] != 0).argmax(axis=1)]
+# nighttime_start_times = sept_hours[(is_valid_nighttime_altaz[is_night_valid] != 0).argmax(axis=1)]
+# nighttime_end_times = np.flip(sept_hours)[(np.fliplr(is_valid_nighttime_altaz)[is_night_valid] != 0).argmax(axis=1)]
 
 # test = nighttime_end_times - nighttime_start_times
 # print(test.to_value(u.hour))
@@ -139,9 +140,6 @@ if verbose:
 
 if verbose:
     print(valid_exotable['pl_trandep'])
-
-
-
 
 
 fig, ax = plt.subplots(tight_layout=True)
