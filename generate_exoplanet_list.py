@@ -96,7 +96,7 @@ is_valid_nighttime_altaz = is_in_elevation * is_night[None, :]
 is_day_valid = is_valid_daytime_altaz.sum(axis=1) > min_day_obsv*samples_per_hour
 is_night_valid = is_valid_nighttime_altaz.sum(axis=1) > min_night_obsv*samples_per_hour
 # find out which exoplanet candidates survived
-verbose = True
+verbose = False
 if verbose:
     print('Number observable during the day', is_day_valid.sum())
     print('Number observable during the night', is_night_valid.sum())
@@ -175,7 +175,7 @@ for id in peter_table['System']:
 has_match = []
 for id in peter_id_nums:
     match = 0
-    for exohost in valid_exotable['hostname']:
+    for exohost in valid_exotable['pl_name']:
         match += id in exohost
     has_match.append(match)
 
@@ -184,6 +184,14 @@ has_match = np.array(has_match)
 test = has_match>0
 
 print('number of matches:', has_match.sum())
+
+peter_target_names = list(peter_table['System'])
+t_names = list(valid_exotable['pl_name'])
+
+from itertools import zip_longest
+
+for i in zip_longest(t_names[1:4]+t_names[21:], peter_target_names):
+    print(i)
 
 
 '''write out the results'''
