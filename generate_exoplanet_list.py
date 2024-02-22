@@ -157,6 +157,9 @@ ax.hist(exotable['pl_trandep'].data, bins=100)
 
 
 '''Compare my list to Peter's list'''
+# note:
+# Peter is using TEPCat (https://www.astro.keele.ac.uk/jkt/tepcat/)
+# I am using the NASA Exoplanet Archive (https://exoplanetarchive.ipac.caltech.edu/)
 list_path = '/home/lee/natlab/excite_targets/flight_20240906_140000_UT-6phase3A.csv'
 
 from astropy.io import ascii
@@ -185,39 +188,16 @@ is_overlap = closest_match < 1/60
 overlap_targets = closest_match[is_overlap]
 overlap_table = peter_table[is_overlap]
 
+fig, ax = plt.subplots(tight_layout=True)
 
-# quick and dirty comparision between the lists
-
-peter_id_nums = []
-for id in peter_table['System']:
-    # extract number identifers from the string
-    str = re.search(r'(?<![A-Za-z])\d+', id).group(0)
-    peter_id_nums.append(str.lstrip('0'))
-
-# id_nums = np.array(id_nums)
-# test = np.unique(id_nums, return_counts=True)
-
-has_match = []
-for id in peter_id_nums:
-    match = 0
-    for exohost in valid_exotable['pl_name']:
-        match += id in exohost
-    has_match.append(match)
-
-has_match = np.array(has_match)
-
-test = has_match>0
-
-print('number of matches:', has_match.sum())
-
-peter_target_names = list(peter_table['System'])
-t_names = list(valid_exotable['pl_name'])
-
-from itertools import zip_longest
-
-for i in zip_longest(t_names[1:4]+t_names[21:], peter_target_names):
-    print(i)
-
+ax.scatter(valid_ra, valid_dec, label='My targets')
+ax.scatter(peter_ra, peter_dec, label='Peter\'s targets', marker='+')
+ax.legend()
+ax.set_xlabel('RA')
+ax.set_ylabel('Dec')
+ax.set_title('Sky projection')
+ax.set_ylim(-90, 90)
+ax.set_xlim(0, 360)
 
 '''write out the results'''
 
