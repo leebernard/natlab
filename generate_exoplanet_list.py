@@ -167,15 +167,20 @@ from astropy.table import join
 
 # open Peter's table
 peter_table = ascii.read(list_path, header_start=11, delimiter=',')
+valid_3day_table = ascii.read('target_list_3dayorbits.csv')
 
-print(peter_table['System'])
-print('compared to my list:')
-print(valid_exotable['hostname'])
+if verbose:
+    print(peter_table['System'])
+    print('compared to my list:')
+    print(valid_exotable['hostname'])
 
 # careful comparision between the lists using RA and Dec
 
 peter_ra = peter_table['RA [deg]']
 peter_dec = peter_table['dec [deg]']
+
+ra_3day = valid_3day_table['ra']
+dec_3day = valid_3day_table['dec']
 
 closest_match = []
 for ra, dec in zip(peter_ra, peter_dec):
@@ -190,8 +195,10 @@ overlap_table = peter_table[is_overlap]
 
 fig, ax = plt.subplots(tight_layout=True)
 
-ax.scatter(valid_ra, valid_dec, label='My targets')
-ax.scatter(peter_ra, peter_dec, label='Peter\'s targets', marker='+')
+ax.scatter(valid_ra, valid_dec, label='My targets (<7 day orbits)')
+ax.scatter(ra_3day, dec_3day, label='My Targets with <3 day orbit', marker='s', s=60, color='tab:red', facecolors='none')
+ax.scatter(peter_ra, peter_dec, label='Peter\'s targets', marker='+', color='tab:orange')
+
 ax.legend()
 ax.set_xlabel('RA')
 ax.set_ylabel('Dec')
