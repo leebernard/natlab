@@ -6,10 +6,15 @@ import re
 from astroquery.ipac.nexsci.nasa_exoplanet_archive import NasaExoplanetArchive
 from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_sun, Longitude, Latitude
 from astropy.time import Time
+from numpy import sin, cos, arccos
+
+
+def great_angle(ra1, dec1, ra2, dec2):
+    # assume radians
+    return arccos(sin(dec1)*sin(dec2) + cos(dec1)*cos(dec2)*cos(ra2 - ra1))
 
 
 verbose = False
-
 
 '''query database for potential exoplanet targets'''
 cols_needed = ('pl_name, hostname, hip_name, sy_vmag, sy_kmag, pl_bmassj, pl_bmasse, ra, dec, '
@@ -133,7 +138,11 @@ exotable['nighttime_window_end_time'] = nighttime_end_times
 # generate filtered list of targets
 valid_exotable = exotable[is_valid]
 
-verbose = True
+# extract array of ra and dec
+valid_ra = valid_exotable['ra']
+valid_dec = valid_exotable['dec']
+
+verbose = False
 if verbose:
     print("Number of planets in database:", len(exotable))
     print('Number of planets observable between', start_time, 'and', end_time, ':', len(valid_exotable))
@@ -160,8 +169,24 @@ print(peter_table['System'])
 print('compared to my list:')
 print(valid_exotable['hostname'])
 
-# quick and dirty comparision between the lists
+# careful comparision between the lists using RA and Dec
 
+peter_ra = peter_table['RA [deg]']
+peter_dec = peter_table['dec [deg]']
+
+closest_match = []
+for ra, dec in zip(peter_ra, peter_dec):
+    closest = great_angle(np.radians(ra), np.radians(dec), np.radians(valid_ra), np.radians(valid_dec))
+    closest_match.append(np.degrees(closest.min()))
+closest_match = np.array(closest_match)
+
+# assume anything less than 1 arcmin is the same object
+is_overlap = closest_match < 1/60
+overlap_targets = closest_match[is_overlap]
+overlap_table = peter_table[is_overlap]
+
+
+# quick and dirty comparision between the lists
 
 peter_id_nums = []
 for id in peter_table['System']:
