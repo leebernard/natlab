@@ -18,6 +18,7 @@ verbose = False
 
 '''query database for potential exoplanet targets'''
 cols_needed = ('pl_name, hostname, hip_name, sy_vmag, sy_kmag, pl_bmassj, pl_bmasse, ra, dec, '
+               'disc_facility, disc_telescope, disc_instrument, disc_refname,'
                'pl_orbper, pl_orbpererr1, pl_orbpererr2,'
                'pl_trandep, pl_trandeperr1, pl_trandeperr2, pl_trandeplim')
 
@@ -138,9 +139,18 @@ exotable['nighttime_window_end_time'] = nighttime_end_times
 # generate filtered list of targets
 valid_exotable = exotable[is_valid]
 
+is_kepler = valid_exotable['disc_telescope'] == '0.95 m Kepler Telescope'
+is_canon = valid_exotable['disc_telescope'] == 'Canon 200mm f/1.8L'
+
+if verbose:
+    valid_exotable['disc_telescope'].pprint(max_lines=-1)
+
 # extract array of ra and dec
 valid_ra = valid_exotable['ra']
 valid_dec = valid_exotable['dec']
+
+non_kepler_ra = valid_exotable['ra'][~is_kepler]
+non_kepler_dec = valid_exotable['dec'][~is_kepler]
 
 verbose = False
 if verbose:
@@ -195,8 +205,11 @@ overlap_table = peter_table[is_overlap]
 
 fig, ax = plt.subplots(tight_layout=True)
 
-ax.scatter(valid_ra, valid_dec, label='My targets (<7 day orbits)')
-ax.scatter(ra_3day, dec_3day, label='My Targets with <3 day orbit', marker='s', s=60, color='tab:red', facecolors='none')
+ax.scatter(valid_ra, valid_dec, label='My targets')
+# ax.scatter(non_kepler_ra, non_kepler_dec, label='My targets (excluding Kepler)')
+# ax.scatter(valid_ra[is_kepler], valid_dec[is_kepler], label='Kepler discoveries', marker='s', s=60, color='tab:red', facecolors='none')
+ax.scatter(valid_ra[is_canon], valid_dec[is_canon], label='Canon 200mm f/1.8L', marker='s', s=60, color='tab:red', facecolors='none')
+
 ax.scatter(peter_ra, peter_dec, label='Peter\'s targets', marker='+', color='tab:orange')
 
 ax.legend()
