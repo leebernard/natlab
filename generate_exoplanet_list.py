@@ -141,8 +141,11 @@ valid_exotable = exotable[is_valid]
 
 is_kepler = valid_exotable['disc_telescope'] == '0.95 m Kepler Telescope'
 is_canon = valid_exotable['disc_telescope'] == 'Canon 200mm f/1.8L'
+min_depth = 0.1  # in percentage
+is_validdepth = valid_exotable['pl_trandep'] >= min_depth
 
 if verbose:
+    valid_exotable['disc_facility'].pprint(max_lines=-1)
     valid_exotable['disc_telescope'].pprint(max_lines=-1)
 
 # extract array of ra and dec
@@ -208,7 +211,8 @@ fig, ax = plt.subplots(tight_layout=True)
 ax.scatter(valid_ra, valid_dec, label='My targets')
 # ax.scatter(non_kepler_ra, non_kepler_dec, label='My targets (excluding Kepler)')
 # ax.scatter(valid_ra[is_kepler], valid_dec[is_kepler], label='Kepler discoveries', marker='s', s=60, color='tab:red', facecolors='none')
-ax.scatter(valid_ra[is_canon], valid_dec[is_canon], label='Canon 200mm f/1.8L', marker='s', s=60, color='tab:red', facecolors='none')
+# ax.scatter(valid_ra[is_canon], valid_dec[is_canon], label='Canon 200mm f/1.8L', marker='s', s=60, color='tab:red', facecolors='none')
+ax.scatter(valid_ra[is_validdepth], valid_dec[is_validdepth], label=f'Transit depth > {min_depth}', marker='s', s=60, color='tab:red', facecolors='none')
 
 ax.scatter(peter_ra, peter_dec, label='Peter\'s targets', marker='+', color='tab:orange')
 
