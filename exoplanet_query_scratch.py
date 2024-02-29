@@ -2,6 +2,8 @@
 This is for testing querying the NASA Exoplanet Archive using astroquery.
 '''
 import numpy as np
+import matplotlib.pyplot as plt
+
 from astroquery.ipac.nexsci.nasa_exoplanet_archive import NasaExoplanetArchive
 
 import astropy.units as u
@@ -48,7 +50,7 @@ print(len(test3))
 
 print(test3['pl_trandep'])
 
-import matplotlib.pyplot as plt
+
 
 fig, ax = plt.subplots(tight_layout=True)
 
@@ -92,6 +94,32 @@ test = (arr != 0 ).argmax(axis=1)
 
 arr[np.arange(arr.shape[0]), test[:,0], :]
 
+# plot tepcat
+list_path = '/home/lee/natlab/excite_targets/backup_archives/allinfo-csv.csv'
+
+from astropy.io import ascii
+
+# open Peter's table
+tepcat_table = ascii.read(list_path)
+
+tepcat_ra = tepcat_table['RA(deg)']
+tepcat_dec = tepcat_table['Dec(deg)']
+
+
+fig, ax = plt.subplots(tight_layout=True)
+
+ax.scatter(tepcat_ra, tepcat_dec, label='TEPCat targets')
+
+ax.legend()
+ax.set_xlabel('RA')
+ax.set_ylabel('Dec')
+ax.set_title('Sky projection')
+ax.set_ylim(-90, 90)
+ax.set_xlim(0, 360)
+
+
+list_path = '/home/lee/natlab/excite_targets/backup_archives/observables.csv'
+observables_table = ascii.read(list_path)
 
 
 
