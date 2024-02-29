@@ -32,7 +32,7 @@ exotable = NasaExoplanetArchive.query_criteria_async(table='pscomppars', select=
 # location geo:34.401944,-104.194722, 4032 ft (1220 m)
 fort_sumner = EarthLocation(lat=34.401944*u.deg, lon=-104.194722*u.deg, height=1220*u.m)
 alt_upper_lim = 57  # *u.deg
-alt_lower_lim = 22  # *u.deg
+alt_lower_lim = 23  # *u.deg
 
 
 utc_offset = -6*u.hour  # Eastern Daylight Time
@@ -58,10 +58,10 @@ if verbose:
     print(f"sun's Azimuth = {sun_altaz.az}")
 
 # seperation should be +- 50 degrees from anti-sun azimuth
-range = 50  # plus/minus from the antisun postion
+az_range = 50  # plus/minus from the antisun postion
 
 anti_sun = Longitude(sun_altaz.az - 180*u.deg)  # using astropy Longitude to take advantage of wrapping
-min_az = Longitude(anti_sun - range*u.deg)/u.deg
+min_az = Longitude(anti_sun - az_range*u.deg)/u.deg
 
 # astronomical twilight is defined as the Sun being 12-18° below the horizon. <-18° is complete darkness
 # 12° below the horizon (-12°) is the start of observable conditions.
@@ -84,11 +84,11 @@ az = altaz_cube[:,:,1]
 
 # validation checks: all should be bool arrays
 
-is_anti_sun = (az - min_az)%360 < range*2  # check if the az is within 100 degrees of min_antisun
+is_anti_sun = (az - min_az)%360 < az_range*2  # check if the az is within 100 degrees of min_antisun
 
 is_night = ~ (sun_altaz.alt > -12*u.deg)  # check if it's astronomical night
 
-is_in_elevation = (alt_upper_lim > alt) & (alt > alt_lower_lim)  # check if the telescope can point at the target
+is_in_elevation = (alt < alt_upper_lim) & (alt > alt_lower_lim)  # check if the telescope can point at the target
 
 
 # valid_exotable = [exoplanet for (exoplanet, valid) in zip(exotable, is_anti_sun*is_in_elevation) if valid]
@@ -99,7 +99,19 @@ is_valid_daytime_altaz = is_in_elevation * is_anti_sun * ~is_night[None, :]
 is_valid_nighttime_altaz = is_in_elevation * is_night[None, :]
 
 # check if the observation window is long enough
-is_day_valid = is_valid_daytime_altaz.sum(axis=1) > min_day_obsv*samples_per_hour
+is_day_obstime = is_valid_daytime_altaz.sum(axis=1) > min_day_obsv*samples_per_hour
+
+# check continuity
+day_altaz_bool = is_valid_daytime_altaz[is_day_obstime]
+dayobs_start_index = day_altaz_bool.argmax(axis=1)
+dayobs_end_index = (day_altaz_bool.shape[1] - np.fliplr(day_altaz_bool).argmax(axis=1) - 1)
+is_continuous = []
+for n in range(day_altaz_bool.shape[0]):
+    start_i = dayobs_start_index[n]
+    end_i = dayobs_end_index[n]
+    is_continuous.append(day_altaz_bool[n, start_i:end_i].any() == False)
+
+
 is_night_valid = is_valid_nighttime_altaz.sum(axis=1) > min_night_obsv*samples_per_hour
 # find out which exoplanet candidates survived
 verbose = False
@@ -227,5 +239,6 @@ ax.set_xlim(0, 360)
 
 valid_exotable.write('target_list.csv', format='csv')
 
-
+with np.printoptions(threshold=np.inf, linewidth=200):
+    print(day_altaz_bool)
 
