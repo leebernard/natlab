@@ -42,7 +42,7 @@ flight_time = end_time - start_time  # this gives flight time in days
 flight_time = flight_time.to_value(u.hour)  # convert flight time to hours
 samples_per_hour = 12
 min_day_obsv = 2  # in hours
-min_night_obsv = 4  # in hours
+min_night_obsv = 2  # in hours
 
 
 '''Filter the table according to observability'''
@@ -102,17 +102,51 @@ is_valid_nighttime_altaz = is_in_elevation * is_night[None, :]
 is_day_obstime = is_valid_daytime_altaz.sum(axis=1) > min_day_obsv*samples_per_hour
 
 # check continuity
-day_altaz_bool = is_valid_daytime_altaz[is_day_obstime]
-dayobs_start_index = day_altaz_bool.argmax(axis=1)
-dayobs_end_index = (day_altaz_bool.shape[1] - np.fliplr(day_altaz_bool).argmax(axis=1) - 1)
-is_continuous = []
-for n in range(day_altaz_bool.shape[0]):
-    start_i = dayobs_start_index[n]
-    end_i = dayobs_end_index[n]
-    is_continuous.append(day_altaz_bool[n, start_i:end_i].any() == False)
+# day_altaz_bool = is_valid_daytime_altaz[is_day_obstime]
+# dayobs_start_index = day_altaz_bool.argmax(axis=1)
+# dayobs_end_index = (day_altaz_bool.shape[1] - np.fliplr(day_altaz_bool).argmax(axis=1) - 1)
+is_day_discontinuous = [None]*is_day_obstime.shape[0]
+is_day_peak = [None]*is_day_obstime.shape[0]
+for n in range(is_day_obstime.shape[0]):
+    if is_day_obstime[n]:
+        # continuity check
+        target_altaz_bool = is_valid_daytime_altaz[n]
+        start_i = target_altaz_bool.argmax()
+        end_i = target_altaz_bool.shape[0] - np.flip(target_altaz_bool).argmax() - 1
+        is_day_discontinuous[n] = np.any(target_altaz_bool[start_i:end_i] == False)
+        if verbose and is_day_discontinuous[n]:
+            print('!!!WARNING!!! Discontinuity in the observing schedulle')
+
+        # check if the target peaks during the observation
+        alt_diffs = np.diff(target_altaz_bool[start_i:end_i])
+        is_day_peak[n] = np.any(alt_diffs < 0) and np.any(alt_diffs > 0)
+    else:
+        is_day_discontinuous[n] = False
+        is_day_peak[n] = False
+
+is_peak = np.array(is_day_peak)
+is_discontinuous = np.array(is_day_discontinuous)
+
+is_day_valid = is_day_obstime * is_peak * ~is_discontinuous
 
 
-is_night_valid = is_valid_nighttime_altaz.sum(axis=1) > min_night_obsv*samples_per_hour
+is_night_obstime = is_valid_nighttime_altaz.sum(axis=1) > min_night_obsv*samples_per_hour
+night_alt = alt[is_night_obstime]
+# check continuity for nighttime
+night_altaz_bool = is_valid_nighttime_altaz[is_night_obstime]
+nightobs_start_index = night_altaz_bool.argmax(axis=1)
+nightobs_end_index = (night_altaz_bool.shape[1] - np.fliplr(night_altaz_bool).argmax(axis=1) - 1)
+is_discontinuous = []
+is_peak = []
+for n in range(night_altaz_bool.shape[0]):
+    start_i = nightobs_start_index[n]
+    end_i = nightobs_end_index[n]
+    if np.any(night_altaz_bool[n, start_i:end_i] == False):
+        print('!!!WARNING!!! Discontinuity in the observing schedule')
+    alt_diffs = np.diff(day_alt[n, start_i:end_i])
+    is_peak.append(np.any(alt_diffs < 0) and np.any(alt_diffs > 0))
+is_peak = np.array(is_peak)
+
 # find out which exoplanet candidates survived
 verbose = False
 if verbose:
