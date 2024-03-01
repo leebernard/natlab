@@ -101,6 +101,7 @@ is_valid_nighttime_altaz = is_in_elevation * is_night[None, :]
 # check if the observation window is long enough
 is_day_obstime = is_valid_daytime_altaz.sum(axis=1) > min_day_obsv*samples_per_hour
 
+verbose = True
 # check continuity and if the target peaks during observation
 # day_altaz_bool = is_valid_daytime_altaz[is_day_obstime]
 # dayobs_start_index = day_altaz_bool.argmax(axis=1)
@@ -118,17 +119,24 @@ for n in range(is_day_obstime.shape[0]):
             print('!!!WARNING!!! Discontinuity in the observing schedulle')
 
         # check if the target peaks during the observation
-        alt_diffs = np.diff(target_altaz_bool[start_i:end_i])
+        observation_alts = alt[start_i:end_i]
+        alt_diffs = np.diff(observation_alts)
+        if verbose:
+            print('----------------------------------------------')
+            print('target', n, 'observation alts')
+            print(observation_alts)
+            print('target diffs')
+            print(alt_diffs)
         is_day_peak[n] = np.any(alt_diffs < 0) and np.any(alt_diffs > 0)
     else:
         is_day_discontinuous[n] = False
         is_day_peak[n] = False
 
-is_peak = np.array(is_day_peak)
-is_discontinuous = np.array(is_day_discontinuous)
+is_day_peak = np.array(is_day_peak)
+is_day_discontinuous = np.array(is_day_discontinuous)
 
-is_day_valid = is_day_obstime * is_peak * ~is_discontinuous
-
+is_day_valid = is_day_obstime # * is_peak * ~is_discontinuous
+verbose = False
 
 is_night_obstime = is_valid_nighttime_altaz.sum(axis=1) > min_night_obsv*samples_per_hour
 is_night_discontinuous = [None]*is_night_obstime.shape[0]
@@ -144,7 +152,14 @@ for n in range(is_night_obstime.shape[0]):
             print('!!!WARNING!!! Discontinuity in the observing schedulle')
 
         # check if the target peaks during the observation
-        alt_diffs = np.diff(target_altaz_bool[start_i:end_i])
+        observation_alts = alt[n, start_i:end_i]
+        alt_diffs = np.diff(observation_alts)
+        if verbose:
+            print('----------------------------------------------')
+            print('target', n, 'observation alts')
+            print(observation_alts)
+            print('target diffs')
+            print(alt_diffs)
         is_night_peak[n] = np.any(alt_diffs < 0) and np.any(alt_diffs > 0)
     else:
         is_night_discontinuous[n] = False
@@ -153,7 +168,8 @@ for n in range(is_night_obstime.shape[0]):
 is_peak = np.array(is_night_peak)
 is_discontinuous = np.array(is_night_discontinuous)
 
-is_night_valid = is_night_obstime * is_peak * ~is_discontinuous
+
+is_night_valid = is_night_obstime #* is_peak * ~is_discontinuous
 
 
 # find out which exoplanet candidates survived
@@ -276,6 +292,21 @@ ax.set_xlabel('RA')
 ax.set_ylabel('Dec')
 ax.set_title('Sky projection')
 ax.set_ylim(-90, 90)
+ax.set_xlim(0, 360)
+
+
+# plot the az and alt
+valid_alt = alt[is_valid][is_validdepth]
+valid_az = az[is_valid][is_validdepth]
+fig, ax = plt.subplots(tight_layout=True)
+
+for target_az, target_alt in zip(valid_az, valid_alt):
+    ax.plot(target_az, target_alt)
+
+ax.set_xlabel('Azimuth')
+ax.set_ylabel('Altitude')
+ax.set_title('Sky projection')
+ax.set_ylim(0, 90)
 ax.set_xlim(0, 360)
 
 '''write out the results'''
