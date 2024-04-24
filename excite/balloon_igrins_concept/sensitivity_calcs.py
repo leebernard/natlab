@@ -39,7 +39,10 @@ sky_sig = 1e5/78 * 1/(u.s*u.um*u.arcsecond**2*u.m**2)
 # wasp 76
 T_star = 6250 * u.K
 r_star = 1.73 * u.R_sun
-
+distance = 195 * u.pc
+R = distance.to(u.R_sun)
+star_flux = B_lambda(wl, T_star)/u.steradian * wl/(h*c)
+star_sig = (r_star/R)**2 * star_flux.to(1/(u.s*u.um*u.arcsecond**2*u.m**2))
 
 
 # calculate typical doppler shift from the target list
