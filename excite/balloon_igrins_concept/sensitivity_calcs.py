@@ -1,3 +1,10 @@
+'''
+Sources:
+https://www.gemini.edu/observing/resources/near-ir-resources/spectroscopy
+https://www.gemini.edu/observing/telescopes-and-sites/sites#Transmission
+https://www.iac.es/sites/default/files/documents/2018-06/pwv_sat.pdf
+'''
+
 import numpy as np
 import astropy.units as u
 
@@ -41,6 +48,7 @@ sky_sig = 1e5/78 * 1/(u.s*u.um*u.arcsecond**2*u.m**2)
 kmag = 8.243  # k band magnitude
 rp_rstar = 0.109
 
+# https://irsa.ipac.caltech.edu/data/SPITZER/docs/dataanalysistools/tools/pet/magtojy/
 flux_star = 2.16e-13 * u.J/(u.s * u.m**2 * u.um)
 star_sig = flux_star * wl/(h*c)
 
@@ -118,6 +126,8 @@ print(f'planet signal per pixel (esitmate): {px_planet_sig* telescope_area:.1f}'
 print(f'source S/N {np.sqrt(px_star_sig * telescope_area * max_exp_t*u.s)}')
 print(f'planet S/N {px_planet_sig* telescope_area * max_exp_t*u.s/np.sqrt(px_star_sig * telescope_area * max_exp_t*u.s)}')
 
+seeing_area = np.pi**2/32400 * 1/60**4
+background_change = 8.5**2 * seeing_area / (4*np.pi * (2.2e-6)**2)
 
-
-
+background_mag_delta = -2.5*np.log10(background_change)
+print(background_mag_delta)
