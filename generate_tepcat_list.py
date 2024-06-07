@@ -1,3 +1,9 @@
+"""
+This is a copy of generate_exoplanet_list.py, with TEPCat replacing the NASA Exoplanet Archive.
+This is really a scratch space, it is not synchronised with the original file.
+"""
+
+
 import matplotlib.pyplot as plt
 import astropy.units as u
 import numpy as np
@@ -20,7 +26,7 @@ cols_needed = ['System', 'Type', 'RA(deg)', 'Dec(deg)', 'Vmag', 'Kmag', 'depth',
 
 list_path = '/home/lee/natlab/excite_targets/backup_archives/allinfo-csv.csv'
 # open tepcat databasetable
-tepcat_table = ascii.read(list_path)
+tepcat_table = ascii.read(list_path, include_names=cols_needed)
 
 
 # retrieve the needed data
@@ -82,7 +88,7 @@ min_az = Longitude(anti_sun - range*u.deg)/u.deg
 # 12° below the horizon (-12°) is the start of observable conditions.
 # if alt < -12°, sun position does not matter
 
-exo_skycoord = np.array([SkyCoord(target['ra']*u.deg, target['dec']*u.deg, frame='icrs').
+exo_skycoord = np.array([SkyCoord(target['RA(deg)']*u.deg, target['Dec(deg)']*u.deg, frame='icrs').
                          transform_to(AltAz(obstime=sept_hours, location=fort_sumner)) for target in exotable])
 
 # # transpose the array, for efficiency
@@ -154,19 +160,10 @@ exotable['nighttime_window_end_time'] = nighttime_end_times
 # generate filtered list of targets
 valid_exotable = exotable[is_valid]
 
-is_kepler = valid_exotable['disc_telescope'] == '0.95 m Kepler Telescope'
-is_canon = valid_exotable['disc_telescope'] == 'Canon 200mm f/1.8L'
-
-if verbose:
-    valid_exotable['disc_facility'].pprint(max_lines=-1)
-    valid_exotable['disc_telescope'].pprint(max_lines=-1)
 
 # extract array of ra and dec
-valid_ra = valid_exotable['ra']
-valid_dec = valid_exotable['dec']
-
-non_kepler_ra = valid_exotable['ra'][~is_kepler]
-non_kepler_dec = valid_exotable['dec'][~is_kepler]
+valid_ra = valid_exotable['RA(deg)']
+valid_dec = valid_exotable['Dec(deg)']
 
 verbose = False
 if verbose:
@@ -174,12 +171,12 @@ if verbose:
     print('Number of planets observable between', start_time, 'and', end_time, ':', len(valid_exotable))
 
 if verbose:
-    print(valid_exotable['pl_trandep'])
+    print(valid_exotable['depth'])
 
 
 fig, ax = plt.subplots(tight_layout=True)
 
-ax.hist(exotable['pl_trandep'].data, bins=100)
+ax.hist(exotable['depth'].data, bins=100)
 
 
 '''Compare my list to Peter's list'''
@@ -188,25 +185,18 @@ ax.hist(exotable['pl_trandep'].data, bins=100)
 # I am using the NASA Exoplanet Archive (https://exoplanetarchive.ipac.caltech.edu/)
 list_path = '/home/lee/natlab/excite_targets/flight_20240906_140000_UT-6phase3A.csv'
 
-from astropy.io import ascii
-from astropy.table import join
 
 # open Peter's table
 peter_table = ascii.read(list_path, header_start=11, delimiter=',')
-valid_3day_table = ascii.read('target_list_3dayorbits.csv')
-
 if verbose:
     print(peter_table['System'])
     print('compared to my list:')
-    print(valid_exotable['hostname'])
+    print(valid_exotable['System'])
 
 # careful comparision between the lists using RA and Dec
 
 peter_ra = peter_table['RA [deg]']
 peter_dec = peter_table['dec [deg]']
-
-ra_3day = valid_3day_table['ra']
-dec_3day = valid_3day_table['dec']
 
 closest_match = []
 for ra, dec in zip(peter_ra, peter_dec):
@@ -221,9 +211,8 @@ overlap_table = peter_table[is_overlap]
 
 fig, ax = plt.subplots(tight_layout=True)
 
-ax.scatter(valid_ra, valid_dec, label='My targets')
-# ax.scatter(non_kepler_ra, non_kepler_dec, label='My targets (excluding Kepler)')
-ax.scatter(valid_ra[is_kepler], valid_dec[is_kepler], label='Kepler discoveries', marker='s', s=60, color='tab:red', facecolors='none')
+ax.scatter(valid_ra, valid_dec, label='My targets in TEPCat')
+# ax.scatter(valid_ra[is_kepler], valid_dec[is_kepler], label='Kepler discoveries', marker='s', s=60, color='tab:red', facecolors='none')
 # ax.scatter(valid_ra[is_canon], valid_dec[is_canon], label='Canon 200mm f/1.8L', marker='s', s=60, color='tab:red', facecolors='none')
 
 ax.scatter(peter_ra, peter_dec, label='Peter\'s targets', marker='+', color='tab:orange')
@@ -237,7 +226,7 @@ ax.set_xlim(0, 360)
 
 '''write out the results'''
 
-valid_exotable.write('target_list.csv', format='csv')
+valid_exotable.write('tepcat_test_target_list.csv', format='csv')
 
 
 
