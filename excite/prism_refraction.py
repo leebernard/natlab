@@ -44,30 +44,31 @@ def output_angle(n, alpha=np.radians(30)):
 
 # refractive indices source:
 # https://refractiveindex.info/?shelf=main&book=CaF2&page=Malitson
+n_633 = np.sqrt(sellmeier(0.633))
 n_850 = np.sqrt(sellmeier(0.850))
 n_1000 = np.sqrt(sellmeier(1.00))
 n_3500 =np.sqrt(sellmeier(3.50))
 
-# angle of minimum deviation
-alpha_min = np.arcsin(n_850*np.sin(np.radians(30)))
-print('angle of minimum deviation, 0.85 um:', 2*np.degrees(alpha_min) - 60, 'degrees')
-
-beta_min = output_angle(n_850, alpha=alpha_min)
-print('output angle at minimum deviation, 0.85 um:', np.degrees(beta_min), 'degrees')
-
-beta_max = output_angle(n_3500, alpha=alpha_min)
-dispersion_angle = beta_min - beta_max
-print('total angle of dispersion for 0.85-3.50 um:', np.degrees(dispersion_angle))
+# # angle of minimum deviation
+# alpha_min = np.arcsin(n_850*np.sin(np.radians(30)))
+# print('angle of minimum deviation, 0.85 um:', 2*np.degrees(alpha_min) - 60, 'degrees')
+#
+# beta_min = output_angle(n_850, alpha=alpha_min)
+# print('output angle at minimum deviation, 0.85 um:', np.degrees(beta_min), 'degrees')
+#
+# beta_max = output_angle(n_3500, alpha=alpha_min)
+# dispersion_angle = beta_min - beta_max
+# print('total angle of dispersion for 0.85-3.50 um:', np.degrees(dispersion_angle))
 
 
 # angle of minimum deviation again, for 1.00 um
 alpha_min = np.arcsin(n_1000*np.sin(np.radians(30)))
 print('angle of minimum deviation, 1.00 um:', 2*np.degrees(alpha_min) - 60, 'degrees')
 
-beta_min = output_angle(n_1000, alpha=alpha_min)
+beta_min = output_angle(n_633, alpha=alpha_min)
 print('output angle at minimum deviation, 1.00 um:', np.degrees(beta_min), 'degrees')
 
-beta_max = output_angle(n_3500, alpha=alpha_min)
+beta_max = output_angle(n_850, alpha=alpha_min)
 dispersion_angle = beta_min - beta_max
 print('total angle of dispersion for 1.00-3.50 um:', np.degrees(dispersion_angle))
 
