@@ -9,21 +9,27 @@ path_length = 101.6*4 + 272.2  # approx internal path length of spectrograph, in
 
 mirror_aperture = 11.77  # diameter in mm
 mount_depth = 1  # mm
-edge_obscuration = mount_depth*np.sin(np.radians(30))
+edge_obscuration = mount_depth*np.sin(np.radians(30)) # *np.cos(phi), where phi is the polar angle from the horizontal
 effective_mirror_aperture = mirror_aperture - edge_obscuration*2  # effective mirror diameter in mm
 print(f'Effect mirror diameter: {effective_mirror_aperture: .2f} mm')
-# Final fold mirror is ~10 mm in clear dia.
-# Dispersion is ~5 mm. centering is ~1 mm. The shadow of the mount is ~1 mm on each side.
-# 10 - 5 - 1 - 2 = 2 mm
-# Room for +/- 1mm of misalignment, 2 mm total
+# Final fold mirror is ~11.77 mm in clear dia.
+# Dispersion is ~5 mm. centering is ~1 mm. The shadow of the mount is ~0.5 mm on each side.
+# 11.77 - 5 - 1 - 1 = 4.8 mm
+# Room for +/- 2.4mm of misalignment, 4.8 mm total
+error_room_obscured = effective_mirror_aperture - 5 - 1
+error_room = mirror_aperture - 5 - 1
 
 # angular field of view.
 # assuming the field of view is centered on the final fold mirror, there is 2 mm of space
-tolerance = 2/path_length  # tolerance in radians
-fov = np.degrees(tolerance)*60  # fov in arminutes
-print(fov, 'arcminutes')  # about 10 arcminutes fov. This is not accounting for oap effects.
+tolerance = error_room/path_length  # tolerance in radians
+fov_vert = np.degrees(tolerance)*60  # fov in arminutes
 
-# distance from slit to D1 dichroic is about 135 mm
+tolerance_horz = error_room_obscured/path_length
+fov_horz = np.degrees(tolerance_horz)*60
+print(f'FOV horizontal: {fov_horz: .2f} arcminutes')  # about 24 arcminutes fov. This is not accounting for oap effects.
+print(f'FOV vertical: {fov_vert: .2f} arcminutes')
+
+# distance from slit to  dichroic is about 135 mm
 d1_distance = 135
 
 print('Centering tolerance on D1:', tolerance*d1_distance)
