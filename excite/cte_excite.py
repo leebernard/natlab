@@ -65,10 +65,12 @@ emission_steady = sigma * T_steady**4 * emission_area
 
 shell_power_5k = sigma * (T - 5)**4 * emission_area
 shell_power_10k = sigma * (T - 10)**4 * emission_area
+shell_power_3k = sigma * (T - 3)**4 * emission_area
 
 
 cooling_power_5k = emission_power - shell_power_5k
 cooling_power_10k = emission_power - shell_power_10k
+cooling_power_3k = emission_power - shell_power_3k
 
 
 fig, (ax1, ax2) = plt.subplots(2, figsize=(6,8),  tight_layout=True)
@@ -84,6 +86,7 @@ ax1.legend()
 
 ax2.plot(T, cooling_power_5k, label='delta = 5 K')
 ax2.plot(T, cooling_power_10k, label='delta = 10 K')
+ax2.plot(T, cooling_power_3k, label='delta = 3 K')
 ax2.set_xlabel('Bench Temperature (K)')
 ax2.set_ylabel('Radiative cooling power  (W)')
 ax2.xaxis.set_inverted(True)
