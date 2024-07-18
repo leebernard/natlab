@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 path_length = 101.6*4 + 272.2  # approx internal path length of spectrograph, in mm
 
 mirror_aperture = 11.77  # diameter in mm
-edge_obscuration = 1*np.sin(np.radians(30))
+mount_depth = 1  # mm
+edge_obscuration = mount_depth*np.sin(np.radians(30))
 effective_mirror_aperture = mirror_aperture - edge_obscuration*2  # effective mirror diameter in mm
 print(f'Effect mirror diameter: {effective_mirror_aperture: .2f} mm')
 # Final fold mirror is ~10 mm in clear dia.
