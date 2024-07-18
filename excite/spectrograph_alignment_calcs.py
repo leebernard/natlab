@@ -14,6 +14,7 @@ x_budget = theta_tolerance * f * np.cos(theta)
 print(f'x-axis error budget: {x_budget*1000:.2f} microns')
 
 # ruler alignment accuracy is about 250 um.
+# alignments made with the caliper had an accuracy of about 50 um.
 
 theta_error1 = 250e-3/(f * np.cos(theta))
 print(f'esimated error upper limit from ruler alignment: {np.degrees(theta_error1)*60:.2f} arcmins')
@@ -44,4 +45,18 @@ R = adj_height/width
 theta_error2 = (1 - R)/(1 + R) * 1/np.tan(theta/2)
 print(f'estimated error upper limit from astigmatism: {np.degrees(theta_error2)*60:.2f} arcmins')
 # that is almost a full degree, that is obviously wrong
+
+'''Strehl ratio calculations'''
+
+eps = .38  # fraction of aperture obscured by secondary
+crit_wavelength = 1.0e-6  # criteria wavelength in meters
+F = 12  # approximate F number of the telescope beam
+f = 101.6e-3  # focal length in meters
+working_angle = np.radians(45)
+
+defocus_tol = 2.41 * crit_wavelength * F**2
+print(f'Defocus tolerance: {defocus_tol*1e6:.2f} um')
+
+angular_tol = (defocus_tol - 100e-6)/(f * np.tan(working_angle/2))
+print(f'Angular tolerance: {np.degrees(angular_tol)*60:.2f} arcminutes')
 
