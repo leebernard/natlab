@@ -41,8 +41,8 @@ def shear_plate(Rc=1.e5,R=21.5,Rs=50.,T=6.35,wedge_ang=18.,N=203,n_idx=1.46,lam=
 
     alpha *= pi/180.  # convert to radians
     shear = T*sin(2*alpha)/sqrt(n_idx**2-sin(alpha)**2)
-    th = 2*wedge_ang*pi/180/3600*sqrt(n_idx**2-sin(alpha)**2)
-    print (f"Expected line spacing: {lam/th:.3f}")
+    theta = 2*wedge_ang*pi/180/3600*sqrt(n_idx**2-sin(alpha)**2)
+    print (f"Expected line spacing: {lam/theta:.3f}")
     print (f"Shear distance: {shear:.3f}")
 
     # create some starting ray positions
@@ -55,9 +55,9 @@ def shear_plate(Rc=1.e5,R=21.5,Rs=50.,T=6.35,wedge_ang=18.,N=203,n_idx=1.46,lam=
     x += shear/2
     if (w0>0): norm = exp(-4*(x/w0)**2-4*(y/w0)**2)
     xp = x - shear
-    yp = y + th*Rs
-    #phase = 2*pi/lam*( th*y + 0.5/Rc*(x**2+y**2) - 0.5/Rc*(xp**2+yp**2) ), expand and drop constant term:
-    phase = 2*pi/lam*( (th*(1.-Rs/Rc))*y + (shear/Rc)*x )
+    yp = y + theta*Rs
+    #phase = 2*pi/lam*( theta*y + 0.5/Rc*(x**2+y**2) - 0.5/Rc*(xp**2+yp**2) ), expand and drop constant term:
+    phase = 2*pi/lam*( (theta*(1.-Rs/Rc))*y + (shear/Rc)*x )
 
     # give the rays some abberations
     if (wfe>0):
