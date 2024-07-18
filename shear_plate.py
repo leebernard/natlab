@@ -4,8 +4,10 @@ import numpy as np
 lam = 632.8e-9  # wavelength of light
 k = 2*np.pi/lam
 
+delta_25mm = np.radians(18/3600)  # 18 arcsecs converted to radians
 
 def R(z):
+    # plane wave approximation for now
     return z
 
 
@@ -28,13 +30,13 @@ def shear(t, alpha, n):
     '''
     return t*np.sin(2*alpha)/np.sqrt(n**2 - np.sin(alpha)**2)
 
-def theta(delta, alpha, n):
+def theta(delta, alpha=np.radians(45), n=1.46):
     '''
     angle of secondary reflected beam ray, about the y-axis. Assumes primary ray angle is 0
     this angle is caused by the shear plate wedge
     delta: the angle of the wedge. If delta=0, then theta=0
     alpha: angle between principle ray and first surface, about the x-axis (typically, 45 degrees)
-    n: index of refraction
+    n: index of refraction, default n=1.46 fused silica
 
     returns
     theta: angle of the secondary beam
@@ -101,6 +103,6 @@ def pattern(x, y, z, delta, alpha, n, t):
     return np.sin(0.5*(k*z - k*z_prime - k*D + phi(x, y, z) - phi(x_prime, y_prime, z_prime + D)))**2
 
 
-
+shear_angle = theta(delta_25mm)
 
 
