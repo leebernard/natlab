@@ -21,6 +21,10 @@ mk_emi_data = np.loadtxt(gemini_em_file)
 oh_em_file = 'excite/balloon_igrins_concept/rousselot2000.dat'
 oh_em_data = np.loadtxt(oh_em_file)
 
+
+
+
+
 bandpass = np.array([1.5, 2.6])
 
 id0 = np.where(mk_trans_data[:, 0] == bandpass[0])[0][0]
@@ -43,14 +47,16 @@ planet_spectrum = planet_flux* wavelengths*1e-6*u.m /(h*c)
 star_blackbody = star_flux * wavelengths*1e-6*u.m /(h*c)
 
 
-fig, ax = plt.subplots(tight_layout=True)
+fig, ax = plt.subplots(tight_layout=True, figsize=(10, 6))
 ax.plot(wavelengths, mk_em, label='Sky Emission, Mauna Kea')
 # ax.plot(wavelengths, mk_trans, label='Sky absorption ')
 # ax.plot(wavelengths, star_blackbody*mk_trans, label='stellar blackbody, Mauna Kea')
-ax.plot(wavelengths, planet_spectrum, label='exoplanet blackbody, top of atmosphere')
-ax.plot(wavelengths, planet_spectrum*mk_trans, label='exoplanet blackbody, Mauna Kea')
-ax.plot(wavelengths, star_blackbody, label='Stellar blackbody, top of atomsphere')
-ax.set_ylabel('ph/sec/arcsec^2/um/m^2')
+ax.plot(wavelengths, planet_spectrum, label='exoplanet blackbody, top of atmosphere', color='C1', linewidth=2.5)
+ax.plot(wavelengths, planet_spectrum*mk_trans, label='exoplanet blackbody, Mauna Kea', color='C2')
+
+ax.plot(wavelengths, star_blackbody, label='Stellar blackbody, top of atomsphere', color='C3', linewidth=2.5)
+ax.set_xlim(1.5, 2.6)
+ax.set_ylabel('Flux (photons/sec/arcsec^2/um/m^2)')
 ax.set_xlabel('Wavelength (um), R~100,000')
 ax.set_yscale('log')
 ax.legend()
