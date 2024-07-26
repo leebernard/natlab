@@ -2,6 +2,7 @@ import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
 
+debug = False
 from astropy.constants import h, c, k_B
 
 rp_rstar = 0.109
@@ -22,10 +23,26 @@ oh_em_file = 'excite/balloon_igrins_concept/rousselot2000.dat'
 oh_em_data = np.loadtxt(oh_em_file)
 
 mcmurdo_trans_file = 'excite/balloon_igrins_concept/transmmsday_40p0km.dat'
-mcmurdo_trans_data = np.loadtxt(mcmurdo_trans_file)
+mcmurdo_trans_data = np.flip(np.loadtxt(mcmurdo_trans_file), axis=0)  # data file is in long to short wavelength order
 
 mcmurdo_em_file = 'excite/balloon_igrins_concept/radmmsday_40p0km.dat'
-mcmurdo_em_data = np.loadtxt(mcmurdo_em_file)
+mcmurdo_em_data = np.flip(np.loadtxt(mcmurdo_em_file), axis=0)
+
+peter_mk_trans_file = 'excite/balloon_igrins_concept/transmaunanite_4p2km.dat'
+peter_mk_trans_data = np.flip(np.loadtxt(peter_mk_trans_file), axis=0)
+
+if debug:
+    fig, ax = plt.subplots()
+    ax.plot(mcmurdo_trans_data[:, 0]/1000, mcmurdo_trans_data[:, 1], label='Sky transmission, 40 km above McMurdo')
+    ax.plot(mk_trans_data[:, 0], mk_trans_data[:, 1], label='Sky transmission, Mauna Kea', linewidth=2.0)
+    ax.plot(peter_mk_trans_data[:, 0]/1000, peter_mk_trans_data[:, 1], label='Mauna Kea, Peter\'s version', linewidth=2.0)
+    ax.set_xlabel('Wavelength (um)')
+
+    ax.set_xlim(mk_trans_data[0, 0], mk_trans_data[-1, 0])
+    # ax.set_ylim(0.5)
+    ax.legend()
+
+
 
 short_limit = 1.5
 long_limit = 2.6
@@ -37,19 +54,33 @@ id1 = np.where(mk_trans_data[:, 0] == bandpass[1])[0][0]
 wavelengths = mk_trans_data[id0:id1+1, 0]
 
 mk_em = mk_emi_data[id0:id1+1, 1] * 1000 # convert from 1/nm to 1/um
-mk_trans = mk_trans_data[id0:id1+1, 1]
+mk_trans = mk_trans_data[id0:id1+1, 1]  # assumes mk_trans uses the same wavelengths as mk_em
 
-idx0 = np.absolute(oh_em_data[:, 0] - short_limit*10000).argmin()  # 1.5 um, in angstroms
-idx1 = np.absolute(oh_em_data[:, 0] - long_limit*10000).argmin()  # 2.6 um, in angstroms
-oh_em = oh_em_data[id0:id1+1]
+id0 = np.absolute(mcmurdo_trans_data[:, 0] - short_limit*1000).argmin()
+id1 = np.absolute(mcmurdo_trans_data[:, 0] - long_limit*1000).argmin()
+wavelengths_mcmurdo = mcmurdo_trans_data[id0:id1+1, 0] / 1000  # convert to um from nm
+mcmurdo_trans = mcmurdo_trans_data[id0:id1+1, 1] # slice the data array to the bandpass
+mcmurdo_em = mcmurdo_em_data[id0:id1+1, 1]
+
+# wavelengths_em = mcmurdo_em_data[id0:id1+1, 0]
+# test = wavelengths_em == wavelengths_mcmurdo
+
+# idx0 = np.absolute(oh_em_data[:, 0] - short_limit*10000).argmin()  # 1.5 um, in angstroms
+# idx1 = np.absolute(oh_em_data[:, 0] - long_limit*10000).argmin()  # 2.6 um, in angstroms
+# oh_em = oh_em_data[id0:id1+1]
+
+
 
 
 planet_flux = B_lambda(wavelengths*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
+mcmurdo_planet_flux = B_lambda(wavelengths_mcmurdo*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
 star_flux = B_lambda(wavelengths*1e-6 * u.m, T=6100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16))**2
 
+
 # convert to photons
-wl_width = 2.e-5*u.um
-planet_spectrum = planet_flux* wavelengths*1e-6*u.m /(h*c)
+# wl_width = 2.e-5*u.um
+planet_spectrum = planet_flux * wavelengths*1e-6*u.m /(h*c)
+mcmurdo_planet_spectrum = mcmurdo_planet_flux * wavelengths_mcmurdo * 1e-6*u.m / (h*c)
 star_blackbody = star_flux * wavelengths*1e-6*u.m /(h*c)
 
 
@@ -58,20 +89,26 @@ ax.plot(wavelengths, mk_em, label='Sky Emission, Mauna Kea')
 # ax.plot(wavelengths, mk_trans, label='Sky absorption ')
 # ax.plot(wavelengths, star_blackbody*mk_trans, label='stellar blackbody, Mauna Kea')
 ax.plot(wavelengths, planet_spectrum, label='exoplanet blackbody, top of atmosphere', color='C1', linewidth=2.5)
-ax.plot(wavelengths, planet_spectrum*mk_trans, label='exoplanet blackbody, Mauna Kea', color='C2')
+ax.plot(wavelengths, planet_spectrum*mk_trans, label='exoplanet blackbody, from Mauna Kea', color='C2')
 
-ax.plot(wavelengths, star_blackbody, label='Stellar blackbody, top of atomsphere', color='C3', linewidth=2.5)
+ax.plot(wavelengths, star_blackbody, label='Stellar blackbody (for reference)', color='C3', linewidth=2.5)
+
+ax.plot(wavelengths_mcmurdo, mcmurdo_em, label='Sky Emission, 40 km above McMurdo', color='C4')
+ax.plot(wavelengths_mcmurdo, mcmurdo_planet_spectrum*mcmurdo_trans, label='exoplanet blackbody, 40 km above McMurdo')
 ax.set_xlim(1.5, 2.6)
+ax.set_ylim(10)
 ax.set_ylabel('Flux (photons/sec/arcsec^2/um/m^2)')
 ax.set_xlabel('Wavelength (um), R~100,000')
-ax.set_yscale('log')
+ax.set_yscale('linear')
 ax.legend()
 
-# fig, ax = plt.subplots(tight_layout=True)
-# ax.plot(wavelengths, mk_trans)
-
 fig, ax = plt.subplots(tight_layout=True)
-ax.plot(oh_em[:, 0]/10000, oh_em[:, 1]*1e2)
+ax.plot(wavelengths, mk_trans)
+ax.plot(wavelengths_mcmurdo/1000, mcmurdo_trans)
+
+
+# fig, ax = plt.subplots(tight_layout=True)
+# ax.plot(oh_em[:, 0]/10000, oh_em[:, 1]*1e2)
 
 
 
