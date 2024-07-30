@@ -38,13 +38,13 @@ if debug:
     ax.plot(peter_mk_trans_data[:, 0]/1000, peter_mk_trans_data[:, 1], label='Mauna Kea, Peter\'s version', linewidth=2.0)
     ax.set_xlabel('Wavelength (um)')
 
-    ax.set_xlim(mk_trans_data[0, 0], mk_trans_data[-1, 0])
+    ax.set_xlim(1.45, 2.6)
     # ax.set_ylim(0.5)
     ax.legend()
 
 
 
-short_limit = 1.5
+short_limit = 1.45
 long_limit = 2.6
 
 bandpass = np.array([short_limit, long_limit])
@@ -60,17 +60,15 @@ id0 = np.absolute(mcmurdo_trans_data[:, 0] - short_limit*1000).argmin()
 id1 = np.absolute(mcmurdo_trans_data[:, 0] - long_limit*1000).argmin()
 wavelengths_mcmurdo = mcmurdo_trans_data[id0:id1+1, 0] / 1000  # convert to um from nm
 mcmurdo_trans = mcmurdo_trans_data[id0:id1+1, 1] # slice the data array to the bandpass
-mcmurdo_em = mcmurdo_em_data[id0:id1+1, 1]
+# convert from uW cm^-2 nm^-1 sr^-1
+# to photons/s arcsec^-2 um^-1 m^-2          J/uW   m/um  phots/(J m)        cm^2/m^2 um/m   sr/arcsec^2
+mcmurdo_em = mcmurdo_em_data[id0:id1+1, 1] * 1e-6 * 1e-6/(h.value*c.value) * 100**2 * 1000 * 1/4.25e10
 
-# wavelengths_em = mcmurdo_em_data[id0:id1+1, 0]
 # test = wavelengths_em == wavelengths_mcmurdo
 
 # idx0 = np.absolute(oh_em_data[:, 0] - short_limit*10000).argmin()  # 1.5 um, in angstroms
 # idx1 = np.absolute(oh_em_data[:, 0] - long_limit*10000).argmin()  # 2.6 um, in angstroms
 # oh_em = oh_em_data[id0:id1+1]
-
-
-
 
 planet_flux = B_lambda(wavelengths*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
 mcmurdo_planet_flux = B_lambda(wavelengths_mcmurdo*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
@@ -86,25 +84,42 @@ star_blackbody = star_flux * wavelengths*1e-6*u.m /(h*c)
 
 fig, ax = plt.subplots(tight_layout=True, figsize=(10, 6))
 ax.plot(wavelengths, mk_em, label='Sky Emission, Mauna Kea')
-# ax.plot(wavelengths, mk_trans, label='Sky absorption ')
-# ax.plot(wavelengths, star_blackbody*mk_trans, label='stellar blackbody, Mauna Kea')
-ax.plot(wavelengths, planet_spectrum, label='exoplanet blackbody, top of atmosphere', color='C1', linewidth=2.5)
 ax.plot(wavelengths, planet_spectrum*mk_trans, label='exoplanet blackbody, from Mauna Kea', color='C2')
 
-ax.plot(wavelengths, star_blackbody, label='Stellar blackbody (for reference)', color='C3', linewidth=2.5)
+ax.plot(wavelengths_mcmurdo, mcmurdo_em, label='Sky Emission, 40 km above McMurdo', color='tab:purple', linewidth=2.5)
+ax.plot(wavelengths_mcmurdo, mcmurdo_planet_spectrum*mcmurdo_trans, label='exoplanet blackbody, 40 km above McMurdo', color='C7', linewidth=2.5)
 
-ax.plot(wavelengths_mcmurdo, mcmurdo_em, label='Sky Emission, 40 km above McMurdo', color='C4')
-ax.plot(wavelengths_mcmurdo, mcmurdo_planet_spectrum*mcmurdo_trans, label='exoplanet blackbody, 40 km above McMurdo')
-ax.set_xlim(1.5, 2.6)
-ax.set_ylim(10)
+ax.plot(wavelengths, planet_spectrum, label='exoplanet blackbody, top of atmosphere', color='C1', linewidth=2.5, linestyle='dotted')
+ax.plot(wavelengths, star_blackbody, label='Stellar blackbody (for reference)', color='C3', linewidth=2.5, linestyle='dotted')
+
+ax.set_xlim(1.45, 2.5)
+ax.set_ylim(1)
 ax.set_ylabel('Flux (photons/sec/arcsec^2/um/m^2)')
 ax.set_xlabel('Wavelength (um), R~100,000')
-ax.set_yscale('linear')
+ax.set_yscale('log')
 ax.legend()
 
-fig, ax = plt.subplots(tight_layout=True)
-ax.plot(wavelengths, mk_trans)
-ax.plot(wavelengths_mcmurdo/1000, mcmurdo_trans)
+
+fig2, (ax1, ax2) = plt.subplots(2, tight_layout=True)
+
+ax1.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea')
+ax1.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo')
+
+ax1.set_xlim(1.45, 2.5)
+ax1.set_xlabel('Wavelength (um)')
+ax1.set_ylabel('Transmissivity')
+ax1.legend()
+
+ax2.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea')
+ax2.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo')
+
+ax2.set_xlim(1.45, 2.5)
+ax2.set_ylim(0.98, 1.002)
+ax2.set_xlabel('Wavelength (um)')
+ax2.set_ylabel('Zoomed to 98% region')
+ax2.legend()
+
+
 
 
 # fig, ax = plt.subplots(tight_layout=True)
