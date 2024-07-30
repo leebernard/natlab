@@ -2,8 +2,11 @@ import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
 
-debug = False
+from scipy.ndimage import gaussian_filter
 from astropy.constants import h, c, k_B
+
+debug = False
+
 
 rp_rstar = 0.109
 
@@ -49,20 +52,28 @@ long_limit = 2.6
 
 bandpass = np.array([short_limit, long_limit])
 
-id0 = np.where(mk_trans_data[:, 0] == bandpass[0])[0][0]
-id1 = np.where(mk_trans_data[:, 0] == bandpass[1])[0][0]
-wavelengths = mk_trans_data[id0:id1+1, 0]
 
-mk_em = mk_emi_data[id0:id1+1, 1] * 1000 # convert from 1/nm to 1/um
-mk_trans = mk_trans_data[id0:id1+1, 1]  # assumes mk_trans uses the same wavelengths as mk_em
+idmk0 = np.where(mk_trans_data[:, 0] == bandpass[0])[0][0]
+idmk1 = np.where(mk_trans_data[:, 0] == bandpass[1])[0][0]
+wavelengths = mk_trans_data[idmk0:idmk1+1, 0]
 
-id0 = np.absolute(mcmurdo_trans_data[:, 0] - short_limit*1000).argmin()
-id1 = np.absolute(mcmurdo_trans_data[:, 0] - long_limit*1000).argmin()
-wavelengths_mcmurdo = mcmurdo_trans_data[id0:id1+1, 0] / 1000  # convert to um from nm
-mcmurdo_trans = mcmurdo_trans_data[id0:id1+1, 1] # slice the data array to the bandpass
+sample_resolution = np.mean(wavelengths/np.diff(wavelengths, prepend=mk_trans_data[idmk0-1, 0]))  # average R value of sample
+
+bin_width = np.mean(np.diff(wavelengths))
+
+desired_r = 40000
+filter_sigma = sample_resolution/desired_r
+
+mk_em = gaussian_filter(mk_emi_data[idmk0:idmk1+1, 1], sigma=filter_sigma) * 1000 # convert from 1/nm to 1/um
+mk_trans = mk_trans_data[idmk0:idmk1+1, 1]  # assumes mk_trans uses the same wavelengths as mk_em
+
+idmm0 = np.absolute(mcmurdo_trans_data[:, 0] - short_limit*1000).argmin()
+idmm1 = np.absolute(mcmurdo_trans_data[:, 0] - long_limit*1000).argmin()
+wavelengths_mcmurdo = mcmurdo_trans_data[idmm0:idmm1+1, 0] / 1000  # convert to um from nm
+mcmurdo_trans = mcmurdo_trans_data[idmm0:idmm1+1, 1] # slice the data array to the bandpass
 # convert from uW cm^-2 nm^-1 sr^-1
 # to photons/s arcsec^-2 um^-1 m^-2          J/uW   m/um  phots/(J m)        cm^2/m^2 um/m   sr/arcsec^2
-mcmurdo_em = mcmurdo_em_data[id0:id1+1, 1] * 1e-6 * 1e-6/(h.value*c.value) * 100**2 * 1000 * 1/4.25e10
+mcmurdo_em = mcmurdo_em_data[idmm0:idmm1+1, 1] * 1e-6 * 1e-6/(h.value*c.value) * 100**2 * 1000 * 1/4.25e10
 
 # test = wavelengths_em == wavelengths_mcmurdo
 
