@@ -114,7 +114,11 @@ ax2.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea')
 ax2.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo')
 
 ax2.set_xlim(1.45, 2.5)
-ax2.set_ylim(0.98, 1.002)
+y_ticks = [.98, .99, 1.00]
+ax2.set_yticks(y_ticks)
+# ax2.yaxis.set_major_formatter('{y_ticks:.2f}')
+ax2.set_ylim(0.978, 1.002)
+
 ax2.set_xlabel('Wavelength (um)')
 ax2.set_ylabel('Zoomed to 98% region')
 ax2.legend()
