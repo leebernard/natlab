@@ -7,15 +7,16 @@ from astropy.constants import h, c, k_B
 
 debug = False
 
-
-rp_rstar = 0.109
+# constants
+rp_rstar = 0.109  # ratio of the planet radius to star radius
+r_instrument = 20000  # R value of the instrument
 
 def B_lambda(wavelength, T):
-
+    # produces units of J / (s m3)
     return 2*h*c**2/wavelength**5 * 1/(np.exp(h*c/(wavelength*k_B*T)) - 1)
 
-# open files
 
+"""open files"""
 gemini_trans_file = 'excite/balloon_igrins_concept/mktrans_zm_16_15.dat'
 mk_trans_data = np.loadtxt(gemini_trans_file)
 
@@ -45,25 +46,27 @@ if debug:
     # ax.set_ylim(0.5)
     ax.legend()
 
+"""end open files"""
 
-
+"""begin spectrum generation"""
+# define bandpass
 short_limit = 1.45
 long_limit = 2.6
 
 bandpass = np.array([short_limit, long_limit])
 
-
 idmk0 = np.where(mk_trans_data[:, 0] == bandpass[0])[0][0]
 idmk1 = np.where(mk_trans_data[:, 0] == bandpass[1])[0][0]
 wavelengths = mk_trans_data[idmk0:idmk1+1, 0]
 
+
+# calculate the resolution of the sample
 sample_resolution = np.mean(wavelengths/np.diff(wavelengths, prepend=mk_trans_data[idmk0-1, 0]))  # average R value of sample
+# bin_width = np.mean(np.diff(wavelengths))
 
-bin_width = np.mean(np.diff(wavelengths))
+filter_sigma = sample_resolution/r_instrument
 
-desired_r = 360
-filter_sigma = sample_resolution/desired_r
-
+# filter the data to the resolution specified by r_instrument
 mk_em = gaussian_filter(mk_emi_data[idmk0:idmk1+1, 1], sigma=filter_sigma) * 1000 # convert from 1/nm to 1/um
 mk_trans = gaussian_filter(mk_trans_data[idmk0:idmk1+1, 1], sigma=filter_sigma)  # assumes mk_trans uses the same wavelengths as mk_em
 
@@ -86,6 +89,18 @@ planet_flux = B_lambda(wavelengths*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m*
 mcmurdo_planet_flux = B_lambda(wavelengths_mcmurdo*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
 star_flux = B_lambda(wavelengths*1e-6 * u.m, T=6100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16))**2
 
+"""End spectrum generation"""
+
+"""Begin flux calculations"""
+mk_mirror_d = 8.1  # m
+mk_fwhm = np.radians(1/3600)  # 1 arcsecond seeing, converted to radians. Assumed wavelength independant
+mcmurdo_mirror_d = 1.2  # m
+mcmurdo_fwhm = wavelengths/mcmurdo_mirror_d * 1e-6  # convert um to m
+
+
+wl_bin = wavelengths/r_instrument  # resolution element width, in wavelengths um
+px_bin = 1/2*wl_bin  # assume nyquist sampling. Units are um/pixel
+
 
 # convert to photons
 # wl_width = 2.e-5*u.um
@@ -107,7 +122,7 @@ ax.plot(wavelengths, star_blackbody, label='Stellar blackbody (for reference)', 
 ax.set_xlim(1.45, 2.5)
 ax.set_ylim(10)
 ax.set_ylabel('Flux (photons/sec/arcsec^2/um/m^2)')
-ax.set_xlabel(f'Wavelength (um), R~{desired_r}')
+ax.set_xlabel(f'Wavelength (um), R~{r_instrument}')
 ax.set_yscale('log')
 ax.legend()
 
