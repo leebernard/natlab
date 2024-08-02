@@ -23,8 +23,8 @@ mk_trans_data = np.loadtxt(gemini_trans_file)
 gemini_em_file = 'excite/balloon_igrins_concept/mk_skybg_zm_16_15_ph.dat'
 mk_emi_data = np.loadtxt(gemini_em_file)
 
-oh_em_file = 'excite/balloon_igrins_concept/rousselot2000.dat'
-oh_em_data = np.loadtxt(oh_em_file)
+oh_em_file = 'excite/balloon_igrins_concept/irlinespec1.txt'
+oh_em_data = np.loadtxt(oh_em_file)  # units are (um, W cm^-2 str^-1 um^-1)
 
 mcmurdo_trans_file = 'excite/balloon_igrins_concept/transmmsday_40p0km.dat'
 mcmurdo_trans_data = np.flip(np.loadtxt(mcmurdo_trans_file), axis=0)  # data file is in long to short wavelength order
@@ -34,6 +34,8 @@ mcmurdo_em_data = np.flip(np.loadtxt(mcmurdo_em_file), axis=0)
 
 peter_mk_trans_file = 'excite/balloon_igrins_concept/transmaunanite_4p2km.dat'
 peter_mk_trans_data = np.flip(np.loadtxt(peter_mk_trans_file), axis=0)
+
+
 
 if debug:
     fig, ax = plt.subplots()
@@ -81,14 +83,17 @@ mcmurdo_em = mcmurdo_em_data[idmm0:idmm1+1, 1] * 1e-6 * 1e-6/(h.value*c.value) *
 peter_sample_r = np.mean(wavelengths_mcmurdo/np.diff(wavelengths_mcmurdo, prepend=mcmurdo_trans_data[idmm0-1, 0] / 1000))  # average R value of sample
 # test = wavelengths_em == wavelengths_mcmurdo
 
-# idx0 = np.absolute(oh_em_data[:, 0] - short_limit*10000).argmin()  # 1.5 um, in angstroms
-# idx1 = np.absolute(oh_em_data[:, 0] - long_limit*10000).argmin()  # 2.6 um, in angstroms
-# oh_em = oh_em_data[id0:id1+1]
+idoh0 = np.absolute(oh_em_data[:, 0] - short_limit).argmin()  # 1.5 um, in angstroms
+idoh1 = np.absolute(oh_em_data[:, 0] - long_limit).argmin()  # 2.6 um, in angstroms
+oh_em = oh_em_data[idoh0:idoh1+1]
 
 planet_flux = B_lambda(wavelengths*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
 mcmurdo_planet_flux = B_lambda(wavelengths_mcmurdo*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
 star_flux = B_lambda(wavelengths*1e-6 * u.m, T=6100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16))**2
 
+if debug:
+    fig, ax = plt.subplots()
+    ax.plot(oh_em[:, 0], oh_em[:, 1])
 """End spectrum generation"""
 
 """Begin flux calculations"""
