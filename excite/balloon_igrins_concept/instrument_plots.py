@@ -92,28 +92,42 @@ star_flux = B_lambda(wavelengths*1e-6 * u.m, T=6100*u.K).to(u.J/(u.s*u.um*u.m**2
 """End spectrum generation"""
 
 """Begin flux calculations"""
-mk_mirror_d = 8.1  # m
-mk_fwhm = np.radians(1/3600)  # 1 arcsecond seeing, converted to radians. Assumed wavelength independant
-mcmurdo_mirror_d = 1.2  # m
-mcmurdo_fwhm = wavelengths/mcmurdo_mirror_d * 1e-6  # convert um to m
+mirror_d_mk = 8.1  # m
+seeing_mk = np.radians(0.34/3600)  # 0.34 arcsecond slit. Slit width of igrins at Gemini South. Units: rad/bin
+mirror_d_mcmurdo = 1.2  # m
+diffraction_mcmurdo = wavelengths[0]/mirror_d_mcmurdo * 1e-6  # convert um to m. Units rad/bin
+px_sampling = 2
+
+# wl_bin = 1.45/r_instrument  # resolution element width. Units are delta-um/bin
+px_radians_mk = 1/px_sampling*seeing_mk  # units: rad/px
+px_radians_mcmurdo = 1/px_sampling*diffraction_mcmurdo
+
+sky_area_mk = np.pi/4 * px_radians_mk**2  # sr of a cone with angle equal to the pixel angle at Mauna Kea
+sky_area_mk = sky_area_mk*4.25e10  # convert to arcsec^2
+sky_area_mcmurdo = np.pi/4 * px_radians_mcmurdo**2  # sr of a cone with angle equal to the balloon pixel angle
+sky_area_mcmurdo = sky_area_mcmurdo*4.25e10  # convert to arcsec^2
+
+if debug:
+    fig, ax = plt.subplots()
+    ax.plot(wavelengths, sky_area_mcmurdo)
+    ax.axhline(sky_area_mk, color='red')
 
 
-wl_bin = wavelengths/r_instrument  # resolution element width, in wavelengths um
-px_bin = 1/2*wl_bin  # assume nyquist sampling. Units are um/pixel
+
 
 
 # convert to photons
 # wl_width = 2.e-5*u.um
-planet_spectrum = planet_flux * wavelengths*1e-6*u.m /(h*c)
-mcmurdo_planet_spectrum = mcmurdo_planet_flux * wavelengths_mcmurdo * 1e-6*u.m / (h*c)
-star_blackbody = star_flux * wavelengths*1e-6*u.m /(h*c)
+planet_spectrum = planet_flux * wavelengths*1e-6*u.m /(h*c) * 1/px_sampling**2
+mcmurdo_planet_spectrum = mcmurdo_planet_flux * wavelengths_mcmurdo * 1e-6*u.m / (h*c) * 1/px_sampling**2
+star_blackbody = star_flux * wavelengths*1e-6*u.m /(h*c)  * 1/px_sampling**2
 
 
 fig, ax = plt.subplots(tight_layout=True, figsize=(10, 6))
-ax.plot(wavelengths, mk_em, label='Sky Emission, Mauna Kea')
+ax.plot(wavelengths, mk_em*sky_area_mk, label='Sky Background, Mauna Kea')
 ax.plot(wavelengths, planet_spectrum*mk_trans, label='exoplanet blackbody, from Mauna Kea', color='C2')
 
-ax.plot(wavelengths_mcmurdo, mcmurdo_em, label='Sky Emission, 40 km above McMurdo', color='tab:purple', linewidth=2.5)
+ax.plot(wavelengths_mcmurdo, mcmurdo_em*sky_area_mcmurdo, label='Sky Background, 40 km above McMurdo', color='tab:purple', linewidth=2.5)
 ax.plot(wavelengths_mcmurdo, mcmurdo_planet_spectrum*mcmurdo_trans, label='exoplanet blackbody, 40 km above McMurdo', color='C7', linewidth=2.5)
 
 ax.plot(wavelengths, planet_spectrum, label='exoplanet blackbody, top of atmosphere', color='C1', linewidth=2.5, linestyle='dotted')
@@ -121,7 +135,7 @@ ax.plot(wavelengths, star_blackbody, label='Stellar blackbody (for reference)', 
 
 ax.set_xlim(1.45, 2.5)
 ax.set_ylim(10)
-ax.set_ylabel('Flux (photons/sec/arcsec^2/um/m^2)')
+ax.set_ylabel('Flux (photons/sec/pixel/um/m^2)')
 ax.set_xlabel(f'Wavelength (um), R~{r_instrument}')
 ax.set_yscale('log')
 ax.legend()
