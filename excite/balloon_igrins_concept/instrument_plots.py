@@ -77,15 +77,22 @@ idmm1 = np.absolute(mcmurdo_trans_data[:, 0] - long_limit*1000).argmin()
 wavelengths_mcmurdo = mcmurdo_trans_data[idmm0:idmm1+1, 0] / 1000  # convert to um from nm
 mcmurdo_trans = mcmurdo_trans_data[idmm0:idmm1+1, 1] # slice the data array to the bandpass
 # convert from uW cm^-2 nm^-1 sr^-1
-# to photons/s arcsec^-2 um^-1 m^-2          J/uW   m/um  phots/(J m)        cm^2/m^2 um/m   sr/arcsec^2
-mcmurdo_em = mcmurdo_em_data[idmm0:idmm1+1, 1] * 1e-6 * 1e-6/(h.value*c.value) * 100**2 * 1000 * 1/4.25e10
+
+peter_wl = mcmurdo_em_data[idmm0:idmm1+1, 0]
+# to photons/s arcsec^-2 um^-1 m^-2            J/uW   m/um    um       phots/(J m)         cm^2/m^2 nm/um   sr/arcsec^2
+peter_em = mcmurdo_em_data[idmm0:idmm1+1, 1] * 1e-6 * 1e-6 * peter_wl/(h.value*c.value) * 100**2 * 1000 * 1/4.25e10  # photons/s arcsec^-2 um^-1 m^-2
 
 peter_sample_r = np.mean(wavelengths_mcmurdo/np.diff(wavelengths_mcmurdo, prepend=mcmurdo_trans_data[idmm0-1, 0] / 1000))  # average R value of sample
 # test = wavelengths_em == wavelengths_mcmurdo
 
 idoh0 = np.absolute(oh_em_data[:, 0] - short_limit).argmin()  # 1.5 um, in angstroms
 idoh1 = np.absolute(oh_em_data[:, 0] - long_limit).argmin()  # 2.6 um, in angstroms
-oh_em = oh_em_data[idoh0:idoh1+1]
+oh_wl = oh_em_data[idoh0:idoh1+1, 0]  # um
+oh_em = oh_em_data[idoh0:idoh1+1, 1]  #
+
+# upsample
+
+mcmurdo_em = peter_em
 
 planet_flux = B_lambda(wavelengths*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
 mcmurdo_planet_flux = B_lambda(wavelengths_mcmurdo*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
