@@ -138,19 +138,19 @@ mcmurdo_planet_spectrum = mcmurdo_planet_flux * wavelengths_mcmurdo * 1e-6*u.m /
 star_blackbody = star_flux * wavelengths*1e-6*u.m /(h*c)  * 1/px_sampling**2
 
 
-fig, (axmk, axmcmurdo) = plt.subplots(2, tight_layout=True, figsize=(12,12))
+fig, (axmk, axmcmurdo) = plt.subplots(2, sharex=True, tight_layout=True, figsize=(12,12))
 axmk.plot(wavelengths, mk_em*sky_area_mk, label='Sky Background, Mauna Kea')
 axmk.plot(wavelengths, planet_spectrum*mk_trans, label='exoplanet blackbody, from Mauna Kea', color='C1')
 axmk.plot(wavelengths, star_blackbody, label='Stellar blackbody at top of atmosphere', color='C3', linewidth=2.5, linestyle='dotted')
 
-axmk.set_xlim(1.45, 2.5)
+# axmk.set_xlim(1.45, 2.5)
 axmk.set_ylim(5)
 axmk.set_ylabel('Flux (photons/sec/pixel/um/m^2)')
 # axmk.set_xlabel(f'Wavelength (um), R~{r_instrument}')
 axmk.set_yscale('log')
 axmk.legend()
 
-axmcmurdo.plot(oh_wl, mcmurdo_em*sky_area_mcmurdo, label='Sky Background, 40 km above McMurdo', color='mediumpurple')  #, color='tab:purple', linewidth=2.5)
+axmcmurdo.plot(oh_wl, mcmurdo_em*sky_area_mcmurdo, label='Sky Background, 40 km above McMurdo', color='mediumblue')  #, color='tab:purple', linewidth=2.5)
 axmcmurdo.plot(wavelengths_mcmurdo, mcmurdo_planet_spectrum*mcmurdo_trans, label='exoplanet blackbody, 40 km above McMurdo', color='C1')
 # ax.plot(wavelengths, planet_spectrum, label='exoplanet blackbody, top of atmosphere', color='C1', linewidth=2.5, linestyle='dotted')
 axmcmurdo.plot(wavelengths, star_blackbody, label='Stellar blackbody at top of atmosphere', color='C3', linewidth=2.5, linestyle='dotted')
@@ -158,24 +158,25 @@ axmcmurdo.plot(wavelengths, star_blackbody, label='Stellar blackbody at top of a
 axmcmurdo.set_xlim(1.45, 2.5)
 axmcmurdo.set_ylim(5)
 axmcmurdo.set_ylabel('Flux (photons/sec/pixel/um/m^2)')
-axmcmurdo.set_xlabel(f'Wavelength (um)')
+axmcmurdo.set_xlabel(f'Wavelength (um), smoothed to R~{r_instrument}')
 axmcmurdo.set_yscale('log')
 axmcmurdo.legend()
 
 
+# transmission comparision zoom
 fig2, (ax1, ax2) = plt.subplots(2, tight_layout=True, figsize=(12, 12))
-linewidth=2.5
+linewidth=2.0
 
-ax1.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea')
-ax1.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo')
+ax1.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea', linewidth=linewidth)
+ax1.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo', linewidth=linewidth)
 # ax1.plot(peter_mk_trans_data[:, 0] / 1000, peter_mk_trans_data[:, 1], label='Mauna Kea, Peter\'s version', linewidth=2.0)
 
 ax1.set_xlabel('Wavelength (um)')
 ax1.set_ylabel('Transmissivity')
 ax1.legend()
 
-ax2.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea')
-ax2.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo')
+ax2.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea', linewidth=linewidth)
+ax2.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo', linewidth=linewidth)
 
 ax2.set_xlim(1.45, 2.5)
 y_ticks = [.98, .99, 1.00]
