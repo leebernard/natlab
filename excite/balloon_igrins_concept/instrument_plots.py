@@ -91,8 +91,9 @@ oh_wl = oh_em_data[idoh0:idoh1+1, 0]  # um
 oh_em = oh_em_data[idoh0:idoh1+1, 1]  #
 
 # upsample
+peter_upsample = np.interp(oh_wl, peter_wl/1000, peter_em)
 
-mcmurdo_em = peter_em
+mcmurdo_em = peter_upsample
 
 planet_flux = B_lambda(wavelengths*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
 mcmurdo_planet_flux = B_lambda(wavelengths_mcmurdo*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
@@ -139,7 +140,7 @@ fig, ax = plt.subplots(tight_layout=True, figsize=(10, 6))
 ax.plot(wavelengths, mk_em*sky_area_mk, label='Sky Background, Mauna Kea')
 ax.plot(wavelengths, planet_spectrum*mk_trans, label='exoplanet blackbody, from Mauna Kea', color='C2')
 
-ax.plot(wavelengths_mcmurdo, mcmurdo_em*sky_area_mcmurdo, label='Sky Background, 40 km above McMurdo', color='tab:purple', linewidth=2.5)
+ax.plot(oh_wl, mcmurdo_em*sky_area_mcmurdo, label='Sky Background, 40 km above McMurdo', color='tab:purple', linewidth=2.5)
 ax.plot(wavelengths_mcmurdo, mcmurdo_planet_spectrum*mcmurdo_trans, label='exoplanet blackbody, 40 km above McMurdo', color='C7', linewidth=2.5)
 
 ax.plot(wavelengths, planet_spectrum, label='exoplanet blackbody, top of atmosphere', color='C1', linewidth=2.5, linestyle='dotted')
