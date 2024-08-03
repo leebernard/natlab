@@ -21,7 +21,7 @@ gemini_trans_file = 'excite/balloon_igrins_concept/mktrans_zm_16_15.dat'
 mk_trans_data = np.loadtxt(gemini_trans_file)
 
 gemini_em_file = 'excite/balloon_igrins_concept/mk_skybg_zm_16_15_ph.dat'
-mk_emi_data = np.loadtxt(gemini_em_file)
+mk_emi_data = np.loadtxt(gemini_em_file)  # ph/sec/arcsec^2/nm/m^2. Assumes 273 K
 
 oh_em_file = 'excite/balloon_igrins_concept/irlinespec1.txt'
 oh_em_data = np.loadtxt(oh_em_file)  # units are (um, W cm^-2 str^-1 um^-1)
@@ -76,11 +76,11 @@ idmm0 = np.absolute(mcmurdo_trans_data[:, 0] - short_limit*1000).argmin()
 idmm1 = np.absolute(mcmurdo_trans_data[:, 0] - long_limit*1000).argmin()
 wavelengths_mcmurdo = mcmurdo_trans_data[idmm0:idmm1+1, 0] / 1000  # convert to um from nm
 mcmurdo_trans = mcmurdo_trans_data[idmm0:idmm1+1, 1] # slice the data array to the bandpass
-# convert from uW cm^-2 nm^-1 sr^-1
 
-peter_wl = mcmurdo_em_data[idmm0:idmm1+1, 0]
-# to photons/s arcsec^-2 um^-1 m^-2            J/uW   m/um    um       phots/(J m)         cm^2/m^2 nm/um   sr/arcsec^2
-peter_em = mcmurdo_em_data[idmm0:idmm1+1, 1] * 1e-6 * 1e-6 * peter_wl/(h.value*c.value) * 100**2 * 1000 * 1/4.25e10  # photons/s arcsec^-2 um^-1 m^-2
+peter_wl = mcmurdo_em_data[idmm0:idmm1+1, 0]  # nm
+# convert from uW cm^-2 nm^-1 sr^-1
+# to photons/s arcsec^-2 um^-1 m^-2            J/uW   m/nm    nm       phots/(J m)         cm^2/m^2 nm/um   sr/arcsec^2
+peter_em = mcmurdo_em_data[idmm0:idmm1+1, 1] * 1e-6 * 1e-9 * peter_wl/(h.value*c.value) * 100**2 * 1000 * 1/4.25e10  # photons/s arcsec^-2 um^-1 m^-2
 
 peter_sample_r = np.mean(wavelengths_mcmurdo/np.diff(wavelengths_mcmurdo, prepend=mcmurdo_trans_data[idmm0-1, 0] / 1000))  # average R value of sample
 # test = wavelengths_em == wavelengths_mcmurdo
