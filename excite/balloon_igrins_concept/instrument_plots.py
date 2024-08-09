@@ -93,6 +93,7 @@ oh_em = oh_em_data[idoh0:idoh1+1, 1] * 100**2 * 1/4.25e10 * 1e-6 * oh_wl/(h.valu
 
 # upsample
 peter_upsample = np.interp(oh_wl, peter_wl/1000, peter_em)
+# mcmurdo_trans_upsample = np.interp(oh_wl, wavelengths_mcmurdo, mcmurdo_trans)
 
 mcmurdo_em = peter_upsample + oh_em
 
@@ -100,7 +101,7 @@ mcmurdo_em = peter_upsample + oh_em
 planet_flux = B_lambda(wavelengths*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
 mcmurdo_planet_flux = B_lambda(wavelengths_mcmurdo*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
 star_flux = B_lambda(wavelengths*1e-6 * u.m, T=6100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16))**2
-
+star_flux_mcmurdo = B_lambda(wavelengths_mcmurdo*1e-6 * u.m, T=6100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16))**2
 if debug:
     fig, ax = plt.subplots()
     ax.plot(oh_em[:, 0], oh_em[:, 1])
@@ -136,6 +137,7 @@ if debug:
 planet_spectrum = planet_flux * wavelengths*1e-6*u.m /(h*c) * 1/px_sampling**2
 mcmurdo_planet_spectrum = mcmurdo_planet_flux * wavelengths_mcmurdo * 1e-6*u.m / (h*c) * 1/px_sampling**2
 star_blackbody = star_flux * wavelengths*1e-6*u.m /(h*c)  * 1/px_sampling**2
+star_bb_mcmurdo = star_flux_mcmurdo * wavelengths_mcmurdo*1e-6*u.m /(h*c)  * 1/px_sampling**2
 
 R = 40000
 gem_area = np.pi * (mirror_d_mk/2)**2
@@ -155,7 +157,7 @@ axmk.set_yscale('log')
 axmk.legend()
 
 
-axmcmurdo.plot(wavelengths, star_blackbody * wavelengths/(2*R), label='Stellar blackbody at top of atmosphere', color='C3', linewidth=2.5, alpha=0.7)
+axmcmurdo.plot(wavelengths_mcmurdo, star_bb_mcmurdo * mcmurdo_trans * wavelengths_mcmurdo/(2*R), label='Stellar blackbody (for reference)', color='C3', linewidth=2.5, alpha=0.7)
 axmcmurdo.plot(oh_wl, mcmurdo_em * sky_area_mcmurdo * oh_wl/(2*R), label='Sky Background, 40 km above McMurdo', color='mediumblue')  #, color='tab:purple', linewidth=2.5)
 axmcmurdo.plot(wavelengths_mcmurdo, mcmurdo_planet_spectrum * mcmurdo_trans * wavelengths_mcmurdo/(2*R), label='exoplanet blackbody, 40 km above McMurdo', color='C1')
 # ax.plot(wavelengths, planet_spectrum, label='exoplanet blackbody, top of atmosphere', color='C1', linewidth=2.5, linestyle='dotted')
