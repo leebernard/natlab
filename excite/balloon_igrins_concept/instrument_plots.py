@@ -9,7 +9,7 @@ debug = False
 
 # constants
 rp_rstar = 0.109  # ratio of the planet radius to star radius
-r_instrument = 2500  # R value of the instrument
+r_smoothing = 2500  # R value of the instrument
 
 def B_lambda(wavelength, T):
     # produces units of J / (s m3)
@@ -66,9 +66,9 @@ wavelengths = mk_trans_data[idmk0:idmk1+1, 0]
 sample_resolution = np.mean(wavelengths/np.diff(wavelengths, prepend=mk_trans_data[idmk0-1, 0]))  # average R value of sample
 # bin_width = np.mean(np.diff(wavelengths))
 
-filter_sigma = sample_resolution/r_instrument
+filter_sigma = sample_resolution/r_smoothing
 
-# filter the data to the resolution specified by r_instrument
+# filter the data to the resolution specified by r_smoothing
 mk_em = gaussian_filter(mk_emi_data[idmk0:idmk1+1, 1], sigma=filter_sigma) * 1000 # convert from 1/nm to 1/um
 mk_trans = gaussian_filter(mk_trans_data[idmk0:idmk1+1, 1], sigma=filter_sigma)  # assumes mk_trans uses the same wavelengths as mk_em
 
@@ -113,7 +113,7 @@ mirror_d_mcmurdo = 1.2  # m
 diffraction_mcmurdo = wavelengths[0]/mirror_d_mcmurdo * 1e-6  # convert um to m. Units rad/bin
 px_sampling = 2
 
-# wl_bin = 1.45/r_instrument  # resolution element width. Units are delta-um/bin
+# wl_bin = 1.45/r_smoothing  # resolution element width. Units are delta-um/bin
 px_radians_mk = 1/px_sampling*seeing_mk  # units: rad/px
 px_radians_mcmurdo = 1/px_sampling*diffraction_mcmurdo
 
@@ -150,7 +150,7 @@ axmk.plot(wavelengths, planet_spectrum * mk_trans * wavelengths/(2*R), label='ex
 # axmk.set_xlim(1.45, 2.5)
 axmk.set_ylim(1e-4, 15)
 axmk.set_ylabel('Flux (photons/sec/pixel/m^2)')
-# axmk.set_xlabel(f'Wavelength (um), R~{r_instrument}')
+# axmk.set_xlabel(f'Wavelength (um), R~{r_smoothing}')
 axmk.set_yscale('log')
 axmk.legend()
 
@@ -163,7 +163,7 @@ axmcmurdo.plot(wavelengths_mcmurdo, mcmurdo_planet_spectrum * mcmurdo_trans * wa
 axmcmurdo.set_xlim(1.45, 2.5)
 axmcmurdo.set_ylim(1e-4, 15)
 axmcmurdo.set_ylabel('Flux (photons/sec/pixel/m^2)')
-axmcmurdo.set_xlabel(f'Wavelength (um), smoothed to R~{r_instrument}')
+axmcmurdo.set_xlabel(f'Wavelength (um), smoothed to R~{r_smoothing}')
 axmcmurdo.set_yscale('log')
 axmcmurdo.legend()
 
