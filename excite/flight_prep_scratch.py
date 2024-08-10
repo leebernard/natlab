@@ -37,11 +37,14 @@ fgs_tiptilt_fov = np.degrees(basler_xdim*1e-3/tip_tilt_focal_distance)
 print(f'tip-tilt fov: {fgs_tiptilt_fov:.3f} degrees')
 
 
-D_artstar = 6.5*25.4  # mm
+D_artstar =6.5*25.4  # mm
 wl = .8  # wavelength in um
 spot_artstar = wl/(D_artstar*1e3) * telescope_fl*1e6  # spot size in um
-print(f'artifical star spot size: {spot_artstar:.2f} um')
+print(f'artifical star diffraction fwhm: {spot_artstar:.2f} um')
 print(f'In pixels: {spot_artstar/basler_pxpitch: .2f}')
+
+# size of the spot as measured
+fgs_spot_fwhm = np.array((11, 25))  # in pixels
 
 delta_y = 500*basler_pxpitch  # um
 delta_angle = np.degrees(delta_y*1e-3/tip_tilt_focal_distance)
