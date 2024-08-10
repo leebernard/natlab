@@ -51,4 +51,9 @@ delta_angle = np.degrees(delta_y*1e-3/tip_tilt_focal_distance)
 print(f'change in angle after adjusting dichroic: {delta_angle*60:.2f} arcminutes')
 
 
+fgc_y = 1515
+offset = basler_dim[1]/2 - fgc_y
+print(f'vertical offset is {offset*basler_pxpitch / 25.4 /1000: .4f} inches')
+
+
 
