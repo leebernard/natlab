@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use("qt5agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -72,6 +74,12 @@ cooling_power_5k = emission_power - shell_power_5k
 cooling_power_10k = emission_power - shell_power_10k
 cooling_power_3k = emission_power - shell_power_3k
 
+T_shell = 295.8
+T_plate = 296.
+plate_emission = sigma * T_plate**4 * emission_area
+shell_emission = sigma * T_shell**4 * emission_area
+radiative_cooling = plate_emission - shell_emission
+print(f'Radiative cooling: {radiative_cooling: .2f} W')
 
 fig, (ax1, ax2) = plt.subplots(2, figsize=(6,8),  tight_layout=True)
 ax1.plot(T, emission_power, label='Emissive power')
