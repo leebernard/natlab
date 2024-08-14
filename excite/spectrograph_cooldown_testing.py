@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib
+matplotlib.use("qt5agg")
 import matplotlib.pyplot as plt
 
 test_data_file = 'excite/DATA_1_warmup_20230531.csv'

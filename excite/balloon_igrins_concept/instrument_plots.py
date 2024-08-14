@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use("qt5agg")
 import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
@@ -201,5 +203,5 @@ ax2.set_ylabel('Zoomed to 98% region')
 # fig, ax = plt.subplots(tight_layout=True)
 # ax.plot(oh_em[:, 0]/10000, oh_em[:, 1]*1e2)
 
-
+plt.show()
 

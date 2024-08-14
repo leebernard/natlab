@@ -1,7 +1,8 @@
 """
 This is scratch space for Ft Sumner 2024 flight campaign calculations.
 """
-
+# import matplotlib
+# matplotlib.use("qt5agg")
 import numpy as np
 
 F = 12
