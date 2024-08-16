@@ -74,8 +74,8 @@ cooling_power_5k = emission_power - shell_power_5k
 cooling_power_10k = emission_power - shell_power_10k
 cooling_power_3k = emission_power - shell_power_3k
 
-T_shell = 295.8
-T_plate = 296.
+T_shell = 143.55  # 173.6
+T_plate = 140.33  # 170.6
 plate_emission = sigma * T_plate**4 * emission_area
 shell_emission = sigma * T_shell**4 * emission_area
 radiative_cooling = plate_emission - shell_emission
