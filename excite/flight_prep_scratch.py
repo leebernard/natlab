@@ -1,5 +1,10 @@
 """
 This is scratch space for Ft Sumner 2024 flight campaign calculations.
+
+slit temperature 24-08-14 14:51
+177 K
+
+
 """
 # import matplotlib
 # matplotlib.use("qt5agg")
