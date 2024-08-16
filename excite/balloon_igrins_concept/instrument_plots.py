@@ -11,7 +11,7 @@ debug = False
 
 # constants
 rp_rstar = 0.109  # ratio of the planet radius to star radius
-r_smoothing = 2500  # R value of the instrument
+r_smoothing = 25000  # R value of the instrument
 
 def B_lambda(wavelength, T):
     # produces units of J / (s m3)
@@ -173,29 +173,28 @@ axmcmurdo.legend()
 
 
 # transmission comparision zoom
-fig2, (ax1, ax2) = plt.subplots(2, tight_layout=True, figsize=(12, 12))
+fig_trans, ax_trans = plt.subplots( tight_layout=True, figsize=(12, 8))
 linewidth=2.0
 
-ax1.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea', linewidth=linewidth)
-ax1.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo', linewidth=linewidth)
+ax_trans.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea', linewidth=linewidth)
+ax_trans.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo', linewidth=linewidth)
 # ax1.plot(peter_mk_trans_data[:, 0] / 1000, peter_mk_trans_data[:, 1], label='Mauna Kea, Peter\'s version', linewidth=2.0)
 
-ax1.set_xlabel('Wavelength (um)')
-ax1.set_ylabel('Transmissivity')
-ax1.legend()
+ax_trans.set_xlabel('Wavelength (um)')
+ax_trans.set_ylabel('Transmissivity')
+ax_trans.legend()
 
-ax2.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea', linewidth=linewidth)
-ax2.plot(wavelengths_mcmurdo, mcmurdo_trans, label='Sky Transmission, 40 km above McMurdo', linewidth=linewidth)
+xmin, xmax, ymin, ymax = 1.75, 2.2, 0.978, 1.002
+axinset = ax_trans.inset_axes(
+    [0.24, 0.4, 0.7, 0.4],
+    xlim=(xmin, xmax), ylim=(ymin, ymax)
+)
+axinset.axhline(.98, color='r', label='98% transmission', ls='--')
+axinset.plot(wavelengths, mk_trans)
+axinset.plot(wavelengths_mcmurdo, mcmurdo_trans)
+axinset.legend(loc='lower left')
 
-ax2.set_xlim(1.45, 2.5)
-y_ticks = [.98, .99, 1.00]
-ax2.set_yticks(y_ticks)
-# ax2.yaxis.set_major_formatter('{y_ticks:.2f}')
-ax2.set_ylim(0.978, 1.002)
-
-ax2.set_xlabel('Wavelength (um)')
-ax2.set_ylabel('Zoomed to 98% region')
-# ax2.legend()
+ax_trans.indicate_inset_zoom(axinset, edgecolor="black", lw=linewidth)
 
 
 
