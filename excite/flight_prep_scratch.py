@@ -21,6 +21,12 @@ tube_accuracy = np.degrees(0.8/300) * 60 - 2  # arcminutes
 basler_dim = np.array((2448, 2048))  # width x height of detector
 basler_pxpitch = 3.45  # um
 
+telescope_diff_um = 2 * .800 * 12  # diffraction limit in um
+telescope_diff_angle = 2 * 800e-9 / 0.500  # in radians
+
+print(f'Telescope diffraction limit: {np.degrees(telescope_diff_angle) * 3600:.2f} arcseconds, '
+      f'{telescope_diff_um : .2f} um')
+
 dot_loc = np.array((1400, 1100))
 
 camera_center = basler_dim/2
