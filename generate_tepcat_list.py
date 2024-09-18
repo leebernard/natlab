@@ -183,7 +183,7 @@ ax.hist(exotable['depth'].data, bins=100)
 # note:
 # Peter is using TEPCat (https://www.astro.keele.ac.uk/jkt/tepcat/)
 # I am using the NASA Exoplanet Archive (https://exoplanetarchive.ipac.caltech.edu/)
-list_path = '/home/lee/natlab/excite_targets/flight_20240906_140000_UT-6phase3A.csv'
+list_path = '/home/lee/nat_lab/excite_targets/flight_20240906_140000_UT-6phase3A.csv'
 
 
 # open Peter's table
