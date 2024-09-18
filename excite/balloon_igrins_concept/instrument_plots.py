@@ -11,7 +11,7 @@ debug = False
 
 # constants
 rp_rstar = 0.109  # ratio of the planet radius to star radius
-r_smoothing = 25000  # R value of the instrument
+r_smoothing = 70  # R value of the instrument
 
 def B_lambda(wavelength, T):
     # produces units of J / (s m3)
@@ -98,6 +98,9 @@ peter_upsample = np.interp(oh_wl, peter_wl/1000, peter_em)
 # mcmurdo_trans_upsample = np.interp(oh_wl, wavelengths_mcmurdo, mcmurdo_trans)
 
 mcmurdo_em = peter_upsample + oh_em
+mcmurdo_sample_res = np.mean(oh_wl/np.diff(oh_wl, prepend=oh_em_data[idoh0-1, 0])) # oh_em_data[idoh0:idoh1+1, 0]
+mcmurdo_sigma = mcmurdo_sample_res/r_smoothing
+mcmurdo_em = gaussian_filter(mcmurdo_em, sigma=mcmurdo_sigma)
 
 
 planet_flux = B_lambda(wavelengths*1e-6 * u.m, T=2100*u.K).to(u.J/(u.s*u.um*u.m**2)) * (1.97 * 6.95700e8 /(190 * 3.0857e16) * rp_rstar)**2 * 3 # fudge factor to make it match star signal
