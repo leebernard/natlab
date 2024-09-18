@@ -3,6 +3,7 @@ import re
 # from astropy.table import setdiff
 
 from astroquery.simbad import Simbad
+from astropy.io import ascii
 # import csv
 
 
@@ -142,13 +143,22 @@ def retrieve_sptype_and_variable(target_list, otype_flags=r'V\*|Ir\*|Er\*|Ro\*|P
 if __name__ == "__main__":
     debug = True
 
-    path = '/home/lee/natlab/excite_targets/'
+    # path = '/home/lee/nat_lab/excite_targets/'
+    path = '/home/lee/nat_lab/excite_targets_ftsumner/Flight_20240823/'
     # file = 'simbad_engineering_2023-09-04.tsv'
 
-    id_file = 'engineering_2023-09-04.txt'
+    # id_file = 'engineering_2023-09-04.txt'
+    id_file = 'flight_20240823_06_00_00_UT-6phase1A.csv'
+    header_line = 10
+    data_line = 11
+    # with open(path+id_file) as file:
+    #     raw_lines = [line.rstrip() for line in file]
+    #     target_list = raw_lines[num_line_skip:]
+    raw_target_data = ascii.read(path+id_file, header_start=header_line, data_start=data_line, format='csv', delimiter=',')
+    target_list = np.char.add('HIP ', raw_target_data['HIP_ID'].data.astype('int').astype('str'))
 
-    with open(path+id_file) as file:
-        target_list = [line.rstrip() for line in file]
+    if debug:
+        print('Target_list', target_list)
 
     # retrieve a table of target data from Simbad
     target_table = retrieve_targetdata(target_list,
@@ -168,7 +178,7 @@ if __name__ == "__main__":
     # is_target_variable() is a wrapper function combines the above two functions:
     shortcut_to_is_variable_star = is_target_variable(target_list)
     print('Ran sucessfully!')
-    print(shortcut_to_is_variable_star)
+    print('Variable star:', shortcut_to_is_variable_star)
     print(is_variable_star == shortcut_to_is_variable_star)
 
     spectral_type = retrieve_spectral_types(target_list)
