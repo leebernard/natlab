@@ -11,7 +11,7 @@ debug = False
 
 # constants
 rp_rstar = 0.109  # ratio of the planet radius to star radius
-r_smoothing = 70  # R value of the instrument
+r_smoothing = 2500  # R value of the instrument
 
 def B_lambda(wavelength, T):
     # produces units of J / (s m3)
@@ -148,7 +148,7 @@ R = 40000
 gem_area = np.pi * (mirror_d_mk/2)**2
 integration = 70
 
-fig, (axmk, axmcmurdo) = plt.subplots(2, sharex=True, tight_layout=True, figsize=(12,12))
+fig, (axmk, axmcmurdo) = plt.subplots(2, sharex=True, tight_layout=True, figsize=(9,6))
 
 axmk.plot(wavelengths, star_blackbody * mk_trans * wavelengths/(2*R), label='Stellar blackbody (for reference)', color='C3', linewidth=2.5, alpha=0.7)
 axmk.plot(wavelengths, mk_em * sky_area_mk * wavelengths/(2*R), label='Sky Background, Mauna Kea')
@@ -176,7 +176,7 @@ axmcmurdo.legend()
 
 
 # transmission comparision zoom
-fig_trans, ax_trans = plt.subplots( tight_layout=True, figsize=(12, 8))
+fig_trans, ax_trans = plt.subplots( tight_layout=True, figsize=(9, 6))
 linewidth=2.0
 
 ax_trans.plot(wavelengths, mk_trans, label='Sky Transmission, Mauna Kea', linewidth=linewidth)
@@ -197,7 +197,7 @@ axinset.plot(wavelengths, mk_trans)
 axinset.plot(wavelengths_mcmurdo, mcmurdo_trans)
 axinset.legend(loc='lower left')
 
-ax_trans.indicate_inset_zoom(axinset, edgecolor="black", lw=linewidth)
+ax_trans.indicate_inset_zoom(axinset, edgecolor="black", lw=3.0)
 
 
 
