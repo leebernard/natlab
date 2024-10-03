@@ -17,7 +17,7 @@ import numpy as np
 
 D_gem = 8.1
 D_super = 0.5
-d_giga = 1.35
+D_giga = 1.35
 
 wl_igrins = np.linspace(1.47, 2.5, num=40000)  # bandpass wavelengths, um
 
@@ -81,7 +81,7 @@ print(f'hires slit wide: {np.degrees(phi_hires)*3600: .2f} arcseconds')
 d1_super = R_hires * phi_hires * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
 print(f'Hires collimated beam diameter, half meter telescope: {d1_super:.2f} mm')
 
-phi_hires = 2e-6/d_giga
+phi_hires = 2e-6/D_giga
 d1_giga = R_hires * phi_hires * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
 print(f'Hires collimated beam diameter, 1.35 meter telescope: {d1_giga:.2f} mm')
 
