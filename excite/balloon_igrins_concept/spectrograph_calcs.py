@@ -15,8 +15,8 @@ Immersion grating has a 60 mK stability requirement, to prevent instablility in 
 
 import numpy as np
 
-d_gem = 8.1
-d_excite = 0.5
+D_gem = 8.1
+D_super = 0.5
 d_giga = 1.35
 
 wl_igrins = np.linspace(1.47, 2.5, num=40000)  # bandpass wavelengths, um
@@ -53,7 +53,7 @@ print(f'f1 fold mirror clearance: {fold1_clearance:.2f} mm')
 W_igrins = d1_igrins/np.sin(alpha_igrins)
 sigma_igrins = 1/grating_density
 
-R_gem = 2*d1_igrins*1e-3 * n_grating * np.tan(delta_igrins) / (phi_gem * d_gem * r_igrins)
+R_gem = 2*d1_igrins*1e-3 * n_grating * np.tan(delta_igrins) / (phi_gem * D_gem * r_igrins)
 print(f'Resolution R={R_gem:g}')
 
 lam_blaze_igrins = 2*sigma_igrins/hband_orders * n_grating*np.sin(delta_igrins) * 1e6  # convert from mm to nm
@@ -73,7 +73,19 @@ A good place to start is noting the spectrum in IGRINS is over-sampled, at 3.66 
 hires_orders = np.arange(72, 122+1)
 R_hires = 40000
 delta_hires = delta_igrins
+alpha_hires = delta_hires + theta
 px_pitch = 18.  # um
+phi_hires = 2e-6/D_super  # set slit wide to diffract limit at 2 um
+print(f'hires slit wide: {np.degrees(phi_hires)*3600: .2f} arcseconds')
+
+d1_super = R_hires * phi_hires * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
+print(f'Hires collimated beam diameter, half meter telescope: {d1_super:.2f} mm')
+
+phi_hires = 2e-6/d_giga
+d1_giga = R_hires * phi_hires * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
+print(f'Hires collimated beam diameter, 1.35 meter telescope: {d1_giga:.2f} mm')
+
+f2_super = d1_super/D_super
 
 
 
