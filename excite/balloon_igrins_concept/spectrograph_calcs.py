@@ -73,23 +73,33 @@ A good place to start is noting the spectrum in IGRINS is over-sampled, at 3.66 
 hires_orders = np.arange(72, 122+1)
 R_hires = 40000
 delta_hires = delta_igrins
+sigma_hires = sigma_igrins
 alpha_hires = delta_hires + theta
+beta_b_hires = delta_hires - theta
 px_pitch = 18.  # um
 
-phi_super = 2e-6/D_super  # set slit wide to diffract limit at 2 um
+wl_crit = 1.5e-6  # wavelength driving slit criteria
+m_crit = np.round(n_grating * sigma_hires*1e-3 / wl_crit * (np.sin(beta_b_hires) + np.sin(alpha_hires)))
+print(f'criteria order: {m_crit}')
+
+phi_super = wl_crit/D_super  # set slit wide to diffract limit at 1.5 um
 print(f'hires slit wide: {np.degrees(phi_super)*3600: .2f} arcseconds')
 
-d1_super = R_hires * phi_super * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
+d1_super = R_hires * sigma_hires/m_crit * np.cos(alpha_hires)
 print(f'Hires collimated beam diameter, half meter telescope: {d1_super:.2f} mm')
-
-phi_giga = 2e-6/D_giga
-d1_giga = R_hires * phi_giga * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
-print(f'Hires collimated beam diameter, 1.35 meter telescope: {d1_giga:.2f} mm')
 
 f2_super = d1_super / (D_super) * 2*px_pitch*1e-6 / phi_super
 print(f'f camera, {D_super} m telescope: {f2_super} mm')
 
+phi_giga = wl_crit/D_giga
+d1_giga = R_hires * sigma_hires/m_crit * np.cos(alpha_hires)
+print(f'Hires collimated beam diameter, 1.35 meter telescope: {d1_giga:.2f} mm')
+
 f2_giga = d1_giga / (D_giga) * 2*px_pitch*1e-6 / phi_giga
 print(f'f camera, {D_giga} m telescope: {f2_giga} mm')
+
+
+
+
 
 
