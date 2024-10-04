@@ -75,17 +75,21 @@ R_hires = 40000
 delta_hires = delta_igrins
 alpha_hires = delta_hires + theta
 px_pitch = 18.  # um
-phi_hires = 2e-6/D_super  # set slit wide to diffract limit at 2 um
-print(f'hires slit wide: {np.degrees(phi_hires)*3600: .2f} arcseconds')
 
-d1_super = R_hires * phi_hires * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
+phi_super = 2e-6/D_super  # set slit wide to diffract limit at 2 um
+print(f'hires slit wide: {np.degrees(phi_super)*3600: .2f} arcseconds')
+
+d1_super = R_hires * phi_super * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
 print(f'Hires collimated beam diameter, half meter telescope: {d1_super:.2f} mm')
 
-phi_hires = 2e-6/D_giga
-d1_giga = R_hires * phi_hires * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
+phi_giga = 2e-6/D_giga
+d1_giga = R_hires * phi_giga * D_super/2 * np.cos(alpha_hires) / (np.sin(delta_hires) * np.cos(theta)) * 1e3  # convert to mm
 print(f'Hires collimated beam diameter, 1.35 meter telescope: {d1_giga:.2f} mm')
 
-f2_super = d1_super/D_super
+f2_super = d1_super / (D_super) * 2*px_pitch*1e-6 / phi_super
+print(f'f camera, {D_super} m telescope: {f2_super} mm')
 
+f2_giga = d1_giga / (D_giga) * 2*px_pitch*1e-6 / phi_giga
+print(f'f camera, {D_giga} m telescope: {f2_giga} mm')
 
 
