@@ -62,7 +62,7 @@ def pupil_defocus(roh):
     return jv(0, roh)
 
 
-def aperture_wavefront(roh, r, pupil_func, phi, m):
+def aperture_wavefront(roh, pupil_func, r, phi, m):
     return pupil_func(np.pi*r*roh) * np.exp(complex(0, phi(roh, m))) * 2*roh
 
 defocus = 0
