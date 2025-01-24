@@ -21,6 +21,9 @@ The zero angle in the pupil plane is defined as the x-axis
 """
 
 import numpy as np
+import matplotlib
+matplotlib.use("qt5agg")
+import matplotlib.pyplot as plt
 
 from scipy import integrate
 # import bessel function
@@ -75,6 +78,11 @@ intensity_dist = np.zeros(r.shape, dtype=np.cdouble)
 for idr, dr in enumerate(r):
     intensity_dist[idr], _ = integrate.quad(aperture_wavefront, 0, 1, args=(pupil_defocus, dr, phi_defocus, defocus), complex_func=True)
 
-irradiance = np.abs(intensity_dist)
+irradiance = np.abs(intensity_dist)**2
+
+fig, ax = plt.subplots()
+ax.plot(r, irradiance)
+
+plt.show()
 
 
