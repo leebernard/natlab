@@ -67,14 +67,14 @@ def aperture_wavefront(roh, pupil_func, r, phi, m):
 
 defocus = 0
 r = 0
-intensity = integrate.quad(aperture_wavefront, 0, 1, args=(pupil_defocus, r, phi_defocus, defocus), complex_func=True)
+intensity, _ = integrate.quad(aperture_wavefront, 0, 1, args=(pupil_defocus, r, phi_defocus, defocus), complex_func=True)
 
 
-# # r = np.linspace(0, 16)
-# intensity_dist = np.zeros(r.shape)
-# for idr, dr in enumerate(r):
-#     intensity_dist[idr] = integrate.quad(aperture_wavefront, 0, 1, args=(pupil_defocus, dr, phi_defocus, defocus), complex_func=True)
+r = np.linspace(0, 16)
+intensity_dist = np.zeros(r.shape, dtype=np.cdouble)
+for idr, dr in enumerate(r):
+    intensity_dist[idr], _ = integrate.quad(aperture_wavefront, 0, 1, args=(pupil_defocus, dr, phi_defocus, defocus), complex_func=True)
 
-irradiance = np.abs(intensity)
+irradiance = np.abs(intensity_dist)
 
 
