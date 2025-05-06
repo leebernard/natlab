@@ -22,7 +22,7 @@ The zero angle in the pupil plane is defined as the x-axis
 
 import numpy as np
 import matplotlib
-matplotlib.use("qt5agg")
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
 from scipy import integrate
@@ -85,4 +85,8 @@ ax.plot(r, irradiance)
 
 plt.show()
 
+'''Nat's code'''
+from make_spot import make_spot
+im = make_spot(defoc=1.)
+plt.imshow(np.log(im))
 
