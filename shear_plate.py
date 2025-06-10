@@ -1,8 +1,8 @@
 import numpy as np
 
 # constants
-lam = 632.8e-9  # wavelength of light
-k = 2*np.pi/lam
+lam_hene = 632.8e-9  # wavelength of light
+
 
 delta_25mm = np.radians(18/3600)  # 18 arcsecs converted to radians
 
@@ -11,12 +11,13 @@ def R(z):
     return z
 
 
-def phi(x, y, z):
+def phi_focus(x, y, z, lam):
+    k = 2*np.pi/lam
     # phase of wavefront
     # x is the separation direction
     # y is the shear direction
-    # R (z) is local radius of curvature
-    return k/(2*R(z)) * (x**2 + y**2)
+    # R(z) = z is local radius of curvature
+    return k/(2*z) * (x**2 + y**2)
 
 def shear(t, alpha, n):
     '''
@@ -79,7 +80,7 @@ def path_length_diff(t, alpha, n):
     return 2*t*np.sqrt(n**2 - np.sin(alpha)**2)
 
 
-def pattern(x, y, z, delta, alpha, n, t):
+def pattern(x, y, z, lam, phi, delta, alpha, n, t):
     '''
     Parameters
     ----------
@@ -95,12 +96,13 @@ def pattern(x, y, z, delta, alpha, n, t):
     -------
 
     '''
+    k = 2*np.pi/lam
     primes = transform_to_second(x, y, z, theta(delta, alpha, n),  shear(t, alpha, n))
     x_prime = primes[0]
     y_prime = primes[1]
     z_prime = primes[2]
     D = path_length_diff(t, alpha, n)
-    return np.sin(0.5*(k*z - k*z_prime - k*D + phi(x, y, z) - phi(x_prime, y_prime, z_prime + D)))**2
+    return np.sin(0.5*(k*z - k*z_prime - k*D + phi - phi(x_prime, y_prime, z_prime + D)))**2
 
 
 shear_angle = theta(delta_25mm)
