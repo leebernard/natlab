@@ -55,6 +55,21 @@ print('number of ramp samples:', test_hdul[2].header['NAXIS2'])
 
 
 
+for dir_entry in dir_list:
+    if path.splitext(dir_entry)[1] == '.fits':
+        file_path = path.join(top_dir, dir_entry)
+        print('file', dir_entry)
+        with fits.open(file_path) as hdul:
+            science_data = hdul[2].data
+            science_header = hdul[2].header
+            print('number of up-the-ramp reads:', science_header['NAXIS2'])
+            print('Mean of first ramp read:', science_data.field('ScienceImage')[0].mean())
+            print('Mean of last ramp read:', science_data.field('ScienceImage')[-1].mean())
+
+    else:
+        print(dir_entry, 'is not a .fits file')
+
+
 
 
 
