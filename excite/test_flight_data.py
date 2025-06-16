@@ -34,19 +34,27 @@ top_dir = '/home/lee/nat_lab/excite_mission/test_flight_data_ft_sumner24/science
 dir_list = listdir(top_dir)
 
 for dir_entry in dir_list:
-    if path.splitext(dir_entry)[1] == '.fits':
+    if path.splitext(dir_entry)[1] != '.fits':
         print(dir_entry)
 
 # open the first file in the path
 test_file = path.join(top_dir, dir_list[0])
 
-with fits.open(test_file) as test_hdul:
-    print('Info from the complete sample')
-    test_hdul.info()
-    # print(test_hdul[0].header)
-    # print(test_hdul[1].header)
-    # print(test_hdul[2].header)
-    data = test_hdul[2]
+test_hdul = fits.open(test_file)
+print('testing hdul:', test_file)
+print('header')
+print(test_hdul[2].header)
+print('data python type', type(test_hdul[2].data))
+
+test_data = test_hdul[2].data
+print(test_data.shape)
+print(test_data.field('ScienceImage').shape)
+print('mean of first ramp sample:', test_data.field('ScienceImage')[0].mean())
+print('mean of last ramp smaple:', test_data.field('ScienceImage')[-1].mean())
+print('number of ramp samples:', test_hdul[2].header['NAXIS2'])
+
+
+
 
 
 
