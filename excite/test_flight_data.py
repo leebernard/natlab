@@ -23,14 +23,24 @@ matplotlib.use('TkAgg')
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os.path as path
 
+from os import listdir
 from astropy.io import fits
 
-file_path = '/home/lee/nat_lab/excite_mission/test_flight_data/example_fits_files/'
+# file_path = '/home/lee/nat_lab/excite_mission/test_flight_data/example_fits_files/'
+top_dir = '/home/lee/nat_lab/excite_mission/test_flight_data_ft_sumner24/science_detector_data'
 
-file_complete = '24-08-31_06_26_34_targetName0_excite_complete.fits'
+dir_list = listdir(top_dir)
 
-with fits.open(file_path+file_complete) as test_hdul:
+for dir_entry in dir_list:
+    if path.splitext(dir_entry)[1] == '.fits':
+        print(dir_entry)
+
+# open the first file in the path
+test_file = path.join(top_dir, dir_list[0])
+
+with fits.open(test_file) as test_hdul:
     print('Info from the complete sample')
     test_hdul.info()
     # print(test_hdul[0].header)
@@ -38,11 +48,6 @@ with fits.open(file_path+file_complete) as test_hdul:
     # print(test_hdul[2].header)
     data = test_hdul[2]
 
-file_cds = '24-08-31_17_10_27_targetName2_excite_CDS.fits'
-
-with fits.open(file_path+file_cds) as test2_hdul:
-    print('And now from the CDS sample')
-    test2_hdul.info()
 
 
 
