@@ -50,10 +50,17 @@ test_data = test_hdul[2].data
 print(test_data.shape)
 print(test_data.field('ScienceImage').shape)
 print('mean of first ramp sample:', test_data.field('ScienceImage')[0].mean())
-print('mean of last ramp smaple:', test_data.field('ScienceImage')[-1].mean())
+print('mean of last ramp sample:', test_data.field('ScienceImage')[-1].mean())
 print('number of ramp samples:', test_hdul[2].header['NAXIS2'])
 
-
+'''
+Data structure appears to be a HDUL with primary header (metadata), SVC HDU, and Science Image HDU
+The Science Image HDU is a table in the astropy fitsrec format.
+The table has 6 fields. The first field (TTYPE1 = ScienceImage) is a (n, 2048, 768) array. I believe this is a window of
+the detector, with 'n' being the number of up-the-ramp samples.
+The rest of the frames seem to be housekeeping data.
+Of note is TTYPE4 = 'resetFrame', which appears to be a flag for if this frame was taken after the Acadia was reset.
+'''
 
 for dir_entry in dir_list:
     if path.splitext(dir_entry)[1] == '.fits':
