@@ -46,12 +46,14 @@ print('header')
 print(test_hdul[2].header)
 print('data python type', type(test_hdul[2].data))
 
-test_data = test_hdul[2].data
+test_data = test_hdul[2].data.field('ScienceImage') * 1.0  # cast to float
+test_header = test_hdul[2].header
 print(test_data.shape)
-print(test_data.field('ScienceImage').shape)
-print('mean of first ramp sample:', test_data.field('ScienceImage')[0].mean())
-print('mean of last ramp sample:', test_data.field('ScienceImage')[-1].mean())
+# test_sci_data = test_data.field('ScienceImage') * 1.0  # cast to float
+print(test_data.shape)
+print(test_data.dtype)
 print('number of ramp samples:', test_hdul[2].header['NAXIS2'])
+print('mean of last - first:', np.mean(test_data[-1] - test_data[0]))
 
 '''
 Data structure appears to be a HDUL with primary header (metadata), SVC HDU, and Science Image HDU
@@ -61,21 +63,24 @@ the detector, with 'n' being the number of up-the-ramp samples.
 The rest of the frames seem to be housekeeping data.
 Of note is TTYPE4 = 'resetFrame', which appears to be a flag for if this frame was taken after the Acadia was reset.
 '''
-
+num_ramps = []
+sig_mean = []
 for dir_entry in dir_list:
     if path.splitext(dir_entry)[1] == '.fits':
         file_path = path.join(top_dir, dir_entry)
         print('file', dir_entry)
         with fits.open(file_path) as hdul:
-            science_data = hdul[2].data
+            science_data = hdul[2].data.field('ScienceImage') * 1.0  # cast to float
             science_header = hdul[2].header
-            print('number of up-the-ramp reads:', science_header['NAXIS2'])
-            print('Mean of first ramp read:', science_data.field('ScienceImage')[0].mean())
-            print('Mean of last ramp read:', science_data.field('ScienceImage')[-1].mean())
+            ramps = science_header['NAXIS2']
+            print('number of up-the-ramp reads:', ramps)
+            signal = np.mean(science_data[-1] - science_data[0])
+            print('Mean of last minus first:', signal)
+            num_ramps.append(ramps)
+            sig_mean.append(signal)
 
     else:
         print(dir_entry, 'is not a .fits file')
-
 
 
 
