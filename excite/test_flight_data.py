@@ -37,7 +37,7 @@ dir_list = listdir(top_dir)
 dir_list.sort()
 
 # open the first file in the path
-test_file = path.join(top_dir, dir_list[1000])
+test_file = path.join(top_dir, dir_list[500])
 
 test_hdul = fits.open(test_file)
 print('testing hdul:', test_file)
@@ -52,7 +52,16 @@ print(test_data.shape)
 print(test_data.shape)
 print(test_data.dtype)
 print('number of ramp samples:', test_hdul[2].header['NAXIS2'])
-print('mean of last - first:', np.mean(test_data[-1] - test_data[0]))
+
+test_signal = test_data[-1] - test_data[0]
+print('mean of last - first:', np.mean(test_signal))
+
+# plot the image frame
+test_fig, (test_sig_ax, first_ax, last_ax) = plt.subplots(3)
+test_sig_ax.imshow(test_signal)
+first_ax.imshow(test_data[2])
+last_ax.imshow(test_data[-1])
+test_fig.tight_layout()
 
 '''
 Data structure appears to be a HDUL with primary header (metadata), SVC HDU, and Science Image HDU
