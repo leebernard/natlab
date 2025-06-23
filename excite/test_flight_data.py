@@ -33,12 +33,11 @@ top_dir = '/home/lee/nat_lab/excite_mission/test_flight_data_ft_sumner24/science
 
 dir_list = listdir(top_dir)
 
-for dir_entry in dir_list:
-    if path.splitext(dir_entry)[1] != '.fits':
-        print(dir_entry)
+# sort the directory
+dir_list.sort()
 
 # open the first file in the path
-test_file = path.join(top_dir, dir_list[0])
+test_file = path.join(top_dir, dir_list[1000])
 
 test_hdul = fits.open(test_file)
 print('testing hdul:', test_file)
@@ -83,6 +82,8 @@ for dir_entry in dir_list:
         print(dir_entry, 'is not a .fits file')
 
 
+# interesting files
+file_1 = '24-08-31_16_29_52_targetName2_excite_complete.fits'  # has 22 ramp samples and mean -38586.77
 
 
 
