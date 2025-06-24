@@ -66,7 +66,7 @@ dir_list = dir_list[:-23]
 # test_fig.tight_layout()
 
 
-flight_list = dir_list[1096:]  # quick and dirty removeal of the pre-flight data.
+flight_list = dir_list[1096:]  # quick and dirty removeal of the ground data.
 i_ascent = [i for i, str in enumerate(flight_list) if 'ascent' in str]
 float_list = flight_list[i_ascent[-1]+1:]
 
@@ -102,39 +102,57 @@ for dir_entry in float_list:
 # interesting files
 
 # below has positive means
-file_1 = '24-08-31_14_34_53_targetName2_excite_complete.fits'  # mean is 1.62 counts
-file_2 = '24-08-31_14_37_00_targetName2_excite_complete.fits'  # mean 2.57 counts
-file_3 = '24-08-31_14_39_02_targetName2_excite_complete.fits'  # mean 1.15
+file_1 = '24-08-31_12_35_18_fullarray0_excite_complete.fits'  # mean 103.0 counts.  Weird artifact along the top
+file_2 = '24-08-31_13_08_37_fullarray0_excite_complete.fits'  # mean 283.9 counts. Only two ramp samples
+file_3 = '24-08-31_13_45_29_fullarray0_excite_complete.fits'  # mean 526.8.  this one is full of noise. Also shows the readout amps are vertical oriented
+file_4 = '24-08-31_14_20_53_targetName2_excite_complete.fits'  # mean 14.31 counts. This one also has the artifact along the top.
+
+'''
+After looking at the below 4 files, it's clear they are all blank images, with no signal.
+'''
+file_5 = '24-08-31_14_34_53_targetName2_excite_complete.fits'  # mean is 1.62 counts
+file_6 = '24-08-31_14_37_00_targetName2_excite_complete.fits'  # mean 2.57 counts
+file_7 = '24-08-31_14_39_02_targetName2_excite_complete.fits'  # mean 1.15
 
 # the above files were one right after another. Below was separate
-file_4 = '24-08-31_15_44_41_targetName2_excite_complete.fits'  # mean 0.478
+file_8 = '24-08-31_15_44_41_targetName2_excite_complete.fits'  # mean 0.478
 
 # open the file
-file_path = path.join(top_dir, file_1)
+file_path = path.join(top_dir, file_4)
 
-file_1_hdul = fits.open(file_path)
-print('interesting file 1 hdul:',file_1)
+file_hdul = fits.open(file_path)
+print('interesting file 2 hdul:',file_path)
 print('header')
-print(file_1_hdul[2].header)
-print('data python type', type(file_1_hdul[2].data))
+print(file_hdul[2].header)
+print('data python type', type(file_hdul[2].data))
 
-file_1_data = file_1_hdul[2].data.field('ScienceImage') * 1.0  # cast to float
-file_1_header = file_1_hdul[2].header
-print(file_1_data.shape)
+file_data = file_hdul[2].data.field('ScienceImage') * 1.0  # cast to float
+file_header = file_hdul[2].header
+print(file_data.shape)
 # test_sci_data = test_data.field('ScienceImage') * 1.0  # cast to float
-print(file_1_data.shape)
-print(file_1_data.dtype)
-print('number of ramp samples:', file_1_hdul[2].header['NAXIS2'])
+print(file_data.shape)
+print(file_data.dtype)
+print('number of ramp samples:', file_hdul[2].header['NAXIS2'])
 
-file_1_signal = file_1_data[-1] - file_1_data[0]
-print('mean of last - first:', np.mean(file_1_signal))
+file_signal = file_data[-1] - file_data[0]
+print('mean of last - first:', np.mean(file_signal))
 
 
 # plot the image frame
-fig, (sig_ax, first_ax, last_ax) = plt.subplots(3)
-sig_ax.imshow(file_1_signal)
-first_ax.imshow(file_1_data[2])
-last_ax.imshow(file_1_data[-1])
+fig, (sig_ax, first_ax, last_ax) = plt.subplots(ncols=3)
+sig_ax.imshow(file_signal)
+first_ax.imshow(file_data[2])
+last_ax.imshow(file_data[-1])
 fig.tight_layout()
+
+# zoom in on the frame
+zoom_fig, zoom_ax = plt.subplots()
+zoom_ax.imshow(file_signal[:,:], norm='log')
+zoom_fig.tight_layout()
+
+# make a histogram
+hist_fig, hist_ax = plt.subplots()
+hist_ax.hist(file_signal.flatten(), bins=281, range=(-300, -20))
+hist_fig.tight_layout()
 
 
