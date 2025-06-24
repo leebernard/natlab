@@ -35,33 +35,41 @@ dir_list = listdir(top_dir)
 
 # sort the directory
 dir_list.sort()
+# remove the zip files, quick and dirty style
+dir_list = dir_list[:-23]
 
-# open the first file in the path
-test_file = path.join(top_dir, dir_list[500])
+# # open the first file in the path
+# test_file = path.join(top_dir, dir_list[500])
+#
+# test_hdul = fits.open(test_file)
+# print('testing hdul:', test_file)
+# print('header')
+# print(test_hdul[2].header)
+# print('data python type', type(test_hdul[2].data))
+#
+# test_data = test_hdul[2].data.field('ScienceImage') * 1.0  # cast to float
+# test_header = test_hdul[2].header
+# print(test_data.shape)
+# # test_sci_data = test_data.field('ScienceImage') * 1.0  # cast to float
+# print(test_data.shape)
+# print(test_data.dtype)
+# print('number of ramp samples:', test_hdul[2].header['NAXIS2'])
+#
+# test_signal = test_data[-1] - test_data[0]
+# print('mean of last - first:', np.mean(test_signal))
+#
+# # plot the image frame
+# test_fig, (test_sig_ax, first_ax, last_ax) = plt.subplots(3)
+# test_sig_ax.imshow(test_signal)
+# first_ax.imshow(test_data[2])
+# last_ax.imshow(test_data[-1])
+# test_fig.tight_layout()
 
-test_hdul = fits.open(test_file)
-print('testing hdul:', test_file)
-print('header')
-print(test_hdul[2].header)
-print('data python type', type(test_hdul[2].data))
 
-test_data = test_hdul[2].data.field('ScienceImage') * 1.0  # cast to float
-test_header = test_hdul[2].header
-print(test_data.shape)
-# test_sci_data = test_data.field('ScienceImage') * 1.0  # cast to float
-print(test_data.shape)
-print(test_data.dtype)
-print('number of ramp samples:', test_hdul[2].header['NAXIS2'])
+flight_list = dir_list[1096:]  # quick and dirty removeal of the pre-flight data.
+i_ascent = [i for i, str in enumerate(flight_list) if 'ascent' in str]
+float_list = flight_list[i_ascent[-1]+1:]
 
-test_signal = test_data[-1] - test_data[0]
-print('mean of last - first:', np.mean(test_signal))
-
-# plot the image frame
-test_fig, (test_sig_ax, first_ax, last_ax) = plt.subplots(3)
-test_sig_ax.imshow(test_signal)
-first_ax.imshow(test_data[2])
-last_ax.imshow(test_data[-1])
-test_fig.tight_layout()
 
 '''
 Data structure appears to be a HDUL with primary header (metadata), SVC HDU, and Science Image HDU
@@ -73,7 +81,7 @@ Of note is TTYPE4 = 'resetFrame', which appears to be a flag for if this frame w
 '''
 num_ramps = []
 sig_mean = []
-for dir_entry in dir_list:
+for dir_entry in float_list:
     if path.splitext(dir_entry)[1] == '.fits':
         file_path = path.join(top_dir, dir_entry)
         print('file', dir_entry)
@@ -92,8 +100,41 @@ for dir_entry in dir_list:
 
 
 # interesting files
-file_1 = '24-08-31_16_29_52_targetName2_excite_complete.fits'  # has 22 ramp samples and mean -38586.77
+
+# below has positive means
+file_1 = '24-08-31_14_34_53_targetName2_excite_complete.fits'  # mean is 1.62 counts
+file_2 = '24-08-31_14_37_00_targetName2_excite_complete.fits'  # mean 2.57 counts
+file_3 = '24-08-31_14_39_02_targetName2_excite_complete.fits'  # mean 1.15
+
+# the above files were one right after another. Below was separate
+file_4 = '24-08-31_15_44_41_targetName2_excite_complete.fits'  # mean 0.478
+
+# open the file
+file_path = path.join(top_dir, file_1)
+
+file_1_hdul = fits.open(file_path)
+print('interesting file 1 hdul:',file_1)
+print('header')
+print(file_1_hdul[2].header)
+print('data python type', type(file_1_hdul[2].data))
+
+file_1_data = file_1_hdul[2].data.field('ScienceImage') * 1.0  # cast to float
+file_1_header = file_1_hdul[2].header
+print(file_1_data.shape)
+# test_sci_data = test_data.field('ScienceImage') * 1.0  # cast to float
+print(file_1_data.shape)
+print(file_1_data.dtype)
+print('number of ramp samples:', file_1_hdul[2].header['NAXIS2'])
+
+file_1_signal = file_1_data[-1] - file_1_data[0]
+print('mean of last - first:', np.mean(file_1_signal))
 
 
+# plot the image frame
+fig, (sig_ax, first_ax, last_ax) = plt.subplots(3)
+sig_ax.imshow(file_1_signal)
+first_ax.imshow(file_1_data[2])
+last_ax.imshow(file_1_data[-1])
+fig.tight_layout()
 
 
