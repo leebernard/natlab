@@ -26,8 +26,7 @@ matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
 from scipy import integrate
-# import bessel function
-from scipy.special import jv
+from scipy.special import jv  # bessel function
 
 # perfect lens with beam diameter 8 mm, focal length 101.4 mm
 
@@ -73,7 +72,7 @@ r = 0
 intensity, _ = integrate.quad(aperture_wavefront, 0, 1, args=(pupil_defocus, r, phi_defocus, defocus), complex_func=True)
 
 
-r = np.linspace(0, 16)
+r = np.linspace(0, 16, num=500)
 intensity_dist = np.zeros(r.shape, dtype=np.cdouble)
 for idr, dr in enumerate(r):
     intensity_dist[idr], _ = integrate.quad(aperture_wavefront, 0, 1, args=(pupil_defocus, dr, phi_defocus, defocus), complex_func=True)
@@ -89,4 +88,22 @@ plt.show()
 from make_spot import make_spot
 im = make_spot(defoc=1.)
 plt.imshow(np.log(im))
+
+'''
+Now consider an F/12 beam, with a 0.5 m primary aperture and a 200 cm central obscuration (i.e., EXCITE)
+'''
+F = 12
+D = 500  # mm
+eps = .2/D
+
+# create an aperture
+grid_res = 500
+diameter_mesh = np.linspace(-D/2, D/2, num=grid_res)
+xx, yy = np.meshgrid(diameter_mesh, diameter_mesh)
+
+aperture = np.sqrt(xx**2 + yy**2)
+aperture = np.ma.masked_array(aperture, mask=aperture > D/2)
+
+
+
 
