@@ -104,6 +104,8 @@ xx, yy = np.meshgrid(diameter_mesh, diameter_mesh)
 aperture = np.sqrt(xx**2 + yy**2)
 aperture = np.ma.masked_array(aperture, mask=aperture > D/2)
 
+# that provides the x and y distances. Now I need z distances
+# z at the mirror aperture is defined as zero
 
 
 
