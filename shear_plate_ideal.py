@@ -1,30 +1,21 @@
-from numpy import arange,zeros,sqrt,dot,newaxis,sin,cos,array,round,pi,arctan2,abs,sign,exp,where,logical_and
-from numpy.random import randn
+from numpy import arange,zeros,sqrt,dot,newaxis,sin,cos,array,round,pi,arctan2,abs,sign,exp,where
 
-def shear_plate(Rc=1.e5,D=25.4,Dmax=40.,eps=0.,Rs=50.,T=6.35,wedge_ang=18.,N=203,n_idx=1.46,lam=632.8e-6,wfe=0.,wfe_phi=0.,w0=0.,alpha=45.,atype='coma',nripple=10,acenter=[0.,0.],plate=-1,visual=True):
+def shear_plate(Rc=1.e5,R=21.5,eps=0.,Rs=50.,T=6.35,wedge_ang=18.,N=203,n_idx=1.46,lam=632.8e-6,wfe=0.,wfe_phi=0.,w0=21.1,alpha=45.,atype='coma',nripple=10,acenter=[0.,0.],plate=-1):
     """
+      SI254P: 10-25.4 mm beam diameter (R=21.5), ang=18, T=6.35 (plate=0)
+      SI100P: 5-10 mm beam diameter (R=11.), ang=40, T=2.6 (plate=1)
+      SI500P: 25.4-50 mm beam diameter (R=30.), ang=10, T=13 (plate=2)
+                        R is more like 70-80.
       alpha: working angle for shear plate
       Rc is radius of curvature (distance from shear plate to focus)
-      D is beam diameter
-      w0 (if>0) is gaussian 1/e^2 beam width (overrides D)
-      eps*D is diameter of central obscuration (default 0)
+      R is beam radius
+      eps*R is radius of central obscuration (default 0)
       Rs is distance from shear plate to observation screen
-      Dmax is shear plate aperture (set's image size also)
       T is shear plate thickness
       n_idx is index of refraction
       wedge_ang is wedge angle in arcsec
       lam: wavelength in same units as R,T
-      N: image size (NxN samples)
-      visual: if True, make like the pattern on ground glass
-
-      plate: pick a shear plate (default -1, otherwise overrides Dmax,wedge_ang,T)
-      # implied units are mm
-      SI100P: 5-10 mm beam diameter (Dmax=15.), ang=40, T=2.6 (plate=0)
-      SI254P: 10-25.4 mm beam diameter (Dmax=40.), ang=18, T=6.35 (plate=1, default)
-      SI500P: 25.4-50 mm beam diameter (Dmax=80.), ang=10, T=13 (plate=2)
-      
-      # adding wavefront errors:
-      atype: type of wavefront error (string)
+      N: create NxN samples
       wfe: rms wavefront error (units of lam)
       wfe_phi: rotation angle of wavefront error (default 0)
       acenter: offset from center of wavefront error (default [0,0])
@@ -45,46 +36,45 @@ def shear_plate(Rc=1.e5,D=25.4,Dmax=40.,eps=0.,Rs=50.,T=6.35,wedge_ang=18.,N=203
          then, pinhole diameter should be ~ 1.3*632.8e-9/0.63e-3*1.49e-3 = 1.95 micron (use 2-micron pinhole)
             can then get beamsize 9.7-16.2 mm
     """
-    if (plate==0): Dmax,wedge_ang,T = 15.,40.,2.6
-    if (plate==1): Dmax,wedge_ang,T = 40.,18.,6.35
-    if (plate==2): Dmax,wedge_ang,T = 80.,10.,13.
-    if (w0>0): print ("Beam diameter:",w0,"(1/e^2)")
-    else: print ("Beam diameter:",D)
-
+    if (plate==0): R,wedge_ang,T = 21.5,18.,6.35
+    if (plate==1): R,wedge_ang,T = 11.,40.,2.6
+    if (plate==2): R,wedge_ang,T = 50.,10.,13.
+    print ("Beam radius:",R)
     print ("Radius of curvature:",Rc)
 
-    if (w0>0): Rw = w0/2.
-    else: Rw = D/2
-
-    Wrms = 1/(2*Rc*sqrt(12)*lam)*Rw**2*(1-eps**2)
-    print (f"Rms wavefront error associated with Rc: {Wrms:.3f}/lambda")
-
     if (w0>0): bdiv = sign(Rc)*arctan2(w0/2,sign(Rc)*Rc)
-    else: bdiv = 2*sign(Rc)*arctan2(D/2,sign(Rc)*Rc)
+    else: bdiv = 2*sign(Rc)*arctan2(R,sign(Rc)*Rc)
     print (f"Beam divergence: {bdiv:.2e}")
 
     alpha *= pi/180.
     shear = T*sin(2*alpha)/sqrt(n_idx**2-sin(alpha)**2)
     th = 2*wedge_ang*pi/180/3600*sqrt(n_idx**2-sin(alpha)**2)
-    print (f"Ray tilt angle: {th*180/pi*3600:.2f} arcsec")
-    print (f"Fringe spacing: {lam/th:.2f}")
-    print (f"Shear distance: {shear:.2f}")
+    print (f"Ray tilt angle: {th*180/pi*3600:.3f} arcsec")
+    print (f"Expected line spacing: {lam/th:.3f}")
+    print (f"Shear distance: {shear:.3f}")
     phi = arctan2(shear,th*Rc)*180/pi
     print (f"Rotation angle: {phi:.2f} (degrees)")
 
     # create some starting ray positions
-    D0 = Dmax/cos(alpha)
-    x0 = (arange(N)-(N-1)/2)*D0/(N-1)
-    x = zeros((N,N),dtype='float32') + x0 + shear/2
+    if (w0>0): R0=w0*1.5
+    else: R0=R*1.5
+    x0 = (arange(N)-(N-1)/2)*R0*2/(N-1)
+    x = zeros((N,N),dtype='float32') + x0
     y = zeros((N,N),dtype='float32'); yt=y.T; yt += x0
-    print (f"Image size: {D0*N/(N-1):.2f} (pixel scale: {D0/(N-1):.3f})")
+    print ("Image pixel scale:",R0*2/(N-1))
 
-    xp, yp = x - shear, y + th*Rs
-    #phase = 2*pi/lam*( th*y + 0.5/Rc*(x**2+y**2) - 0.5/Rc*(xp**2+yp**2) ), expand:
-    phase = 2*pi/lam*( (th*(1.-Rs/Rc))*y + (shear/Rc)*x ) - pi*(shear**2+(th*Rs)**2)/(lam*Rc)
+    x += shear/2
+    if (w0>0): norm = exp(-4*(x/w0)**2-4*(y/w0)**2)
+    xp = x - shear
+    yp = y + th*Rs
+    #phase = 2*pi/lam*( th*y + 0.5/Rc*(x**2+y**2) - 0.5/Rc*(xp**2+yp**2) ), expand and separate-out constant term:
+    phase0 = pi*(shear**2+(th*Rs)**2)/(lam*Rc)
+    phase = 2*pi/lam*( (th*(1.-Rs/Rc))*y + (shear/Rc)*x ) - phase0
 
     # give the rays some abberations
     if (wfe>0):
+        if (w0>0): Rw = w0/2.
+        else: Rw = R
         c,s = cos(wfe_phi*pi/180),sin(wfe_phi*pi/180)
         x1,y1 = (x-acenter[0])*c + (y-acenter[1])*s, -(x-acenter[0])*s + (y-acenter[1])*c
         xp1,yp1 = (xp-acenter[0])*c + (yp-acenter[1])*s, -(xp-acenter[0])*s + (yp-acenter[1])*c
@@ -131,34 +121,26 @@ def shear_plate(Rc=1.e5,D=25.4,Dmax=40.,eps=0.,Rs=50.,T=6.35,wedge_ang=18.,N=203
 
         phase += 2*pi/lam*W
 
-    # work out edges and normalization
-    R1,R2 = Dmax/2,Dmax/2*cos(alpha)   #  if R1,R2 set by masking at shear plate, otherwise:
-    if (D/2<R1 and w0<=0): R1=D/2
-    if (D/2<R2 and w0<=0): R2=D/2
-
+    #R1,R2 = R/sqrt(2),R   #  if R is set by masking at shear plate, otherwise:
+    R1,R2 = R,R
+    good = (x/R1)**2+(y/R2)**2<=1
+    if (eps>0): good[(x/(R1*eps))**2+(y/(R2*eps))**2<=1] = False
+    nx = int(round(shear/(x0[1]-x0[0])))
+    #print ("Pixel offset associated with shear:",nx)
+ 
     if (w0>0):
-        norm1 = exp(-4*(x/w0)**2-4*(y/w0)**2)
-        norm2 = exp(-4*((x-shear)/w0)**2-4*(y/w0)**2)
+        norm1 = 0.*phase
+        norm1[:,nx:N+nx] = norm[:,:N-nx]
+        norm2 = 1.*norm
     else:
-        norm1,norm2=0.*x+1,0.*x+1
-
-    # masking
-    bad = (x/R1)**2+(y/R2)**2>1
-    if (eps>0): bad[(x/(R1*eps))**2+(y/(R2*eps))**2<=1] = True
-    norm1[bad] = 0
-    bad = ((x-shear)/R1)**2+(y/R2)**2>1
-    if (eps>0): bad[((x-shear)/(R1*eps))**2+(y/(R2*eps))**2<=1] = True
-    norm2[bad] = 0
+        norm1,norm2=1.,1.
 
     # convert phase to intensity: 
     s = 0.25*(norm1**2+norm2**2) - 0.5*norm1*norm2*cos(phase)
 
-    if (visual):
-        s *= 1 + randn(N,N)/10.
-        s -= s.min()
-        x = (s/s.max())**(1./2.2)
-        x[N//2-1:N//2+1,:]=0
-        s = zeros((N,N,3),dtype='float32')
-        s[:,:,0] = x
+    mask = 1.*good
+    #mask[:,nx:N+nx] += good[:,:N-nx]
+    mask[:,nx:] += good[:,:N-nx]
+    s[mask<2]=0
 
-    return s
+    return s.T
