@@ -41,12 +41,20 @@ import matplotlib
 matplotlib.use('TkAgg')
 # end hack
 
+# check the path
+import sys
+print(sys.path)
+sys.path.append('')
+print(sys.path)
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os.path as path
 
 from os import listdir
 from astropy.io import fits
+
+from zscale import zscale
 
 # file_path = '/home/lee/nat_lab/excite_mission/test_flight_data/example_fits_files/'
 top_dir = '/home/lee/nat_lab/excite_mission/test_flight_data_ft_sumner24/science_detector_data'
@@ -119,10 +127,20 @@ for dir_entry in float_list:
             sig_mean.append(mean_signal)
 
 
-            fig, (sig_ax, first_ax, last_ax) = plt.subplots(ncols=3)
-            sig_ax.imshow(signal_frame)
-            first_ax.imshow(science_data[0])
-            last_ax.imshow(science_data[-1])
+            # fig, (sig_ax, first_ax, last_ax) = plt.subplots(ncols=3)
+            # sig_ax.imshow(signal_frame)
+            # first_ax.imshow(science_data[0])
+            # last_ax.imshow(science_data[-1])
+            # fig.tight_layout()
+            # plt.show()
+            # input('Press ENTER to close figure and continue.')
+            # plt.close()
+
+            # zscale the data
+            a, b = zscale(signal_frame)
+
+            fig, sig_ax = plt.subplots()
+            sig_ax.imshow(signal_frame.clip(a, b))
             fig.tight_layout()
             plt.show()
             input('Press ENTER to close figure and continue.')
@@ -170,7 +188,9 @@ These are files that stood out after displaying the last-first for all 129 float
 # gradiant
 '24-08-31_13_39_36_fullarray0_excite_complete.fits'
 # no signal, but has some sort of weird artifact.
-'24-08-31_13_50_53_fullarray0_excite_complete.fits'
+'24-08-31_13_50_53_fullarray0_excite_complete.fits'  # the artifact appears to be some sort of readout clocking issue
+# it seems like the pixel locations are in the wrong order. Like it read out half a frame, then read out half of the next frame
+
 # also has the weird artifact
 '24-08-31_13_51_57_fullarray0_excite_complete.fits'
 # gradiant
@@ -182,7 +202,7 @@ These are files that stood out after displaying the last-first for all 129 float
 '24-08-31_14_30_39_targetName2_excite_complete.fits'
 '24-08-31_14_59_37_targetName2_excite_complete.fits'
 '24-08-31_15_10_29_targetName2_excite_complete.fits'
-'24-08-31_15_58_08_targetName2_excite_complete.fits'
+test_filename = '24-08-31_15_58_08_targetName2_excite_complete.fits'
 '24-08-31_16_15_34_targetName2_excite_complete.fits'
 '24-08-31_16_32_01_targetName2_excite_complete.fits'
 '24-08-31_16_39_13_targetName2_excite_complete.fits'
@@ -193,7 +213,7 @@ These are files that stood out after displaying the last-first for all 129 float
 
 
 # open a file
-file_path = path.join(top_dir, file_4)
+file_path = path.join(top_dir, test_filename)
 
 file_hdul = fits.open(file_path)
 print('interesting file 2 hdul:',file_path)
@@ -213,16 +233,20 @@ print('number of ramp samples:', file_hdul[2].header['NAXIS2'])
 file_signal = file_data[-1] - file_data[0]
 print('mean of last - first:', np.mean(file_signal))
 
+# zscale the frames
+a_sig, b_sig = zscale(file_signal)
+a_first, b_first = zscale(file_data[0])
+a_last, b_last = zscale(file_data[-1])
 
 # plot the image frame
 fig, (sig_ax, first_ax, last_ax) = plt.subplots(ncols=3)
-sig_ax.imshow(file_signal)
-first_ax.imshow(file_data[2])
-last_ax.imshow(file_data[-1])
+sig_ax.imshow(file_signal.clip(a_sig, b_sig))
+first_ax.imshow(file_data[0].clip(a_first, b_first))
+last_ax.imshow(file_data[-1].clip(a_last, b_last))
 fig.tight_layout()
 plt.show()
-input('Press ENTER to close figure and continue.')
-plt.close()
+# input('Press ENTER to close figure and continue.')
+# plt.close()
 
 # zoom in on the frame
 zoom_fig, zoom_ax = plt.subplots()
