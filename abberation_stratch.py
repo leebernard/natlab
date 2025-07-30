@@ -108,4 +108,30 @@ aperture = np.ma.masked_array(aperture, mask=aperture > D/2)
 # z at the mirror aperture is defined as zero
 
 
+# play around with oap rotation
+from shear_plate_ideal import shear_plate
+
+
+oap_f = 101.6
+oap_F = 4
+oap_alpha = np.radians(45)
+d_theta = np.radians(0.1)
+test_wavelength = 632.8e-6  # HeNe laser wavelength in mm
+wf_error = d_theta*oap_f*np.tan(oap_alpha/2) / (8 * oap_F**2 * np.sqrt(6)) * np.sqrt(1) / test_wavelength
+
+rot_angle = 0.0  # in degrees
+pattern = shear_plate(Rc=1.e10, atype='oap', wfe=wf_error, wfe_phi=rot_angle)
+
+plt.imshow(pattern.T)
+
+
+# end of Nat's aberration txt
+from spot_class import Spot
+# no spider or central obscuration, or aberrations from M2, ignoring cold stop, lambda=1.5 um
+sp = Spot(spider=0, Rc=1, Rs=0, theta_2=0)
+sp.z00=766.0e-6  # should yield Strehl~0.8 for eps=0, F#=12, lam=1.5 um
+sp.raytrace()
+sp.spotplot()
+im = sp.makeimage()
+plt.imshow(sp.pupil)  # pupil image for oap-type aberration
 
