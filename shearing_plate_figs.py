@@ -11,8 +11,10 @@ import matplotlib.pyplot as plt
 # play around with oap rotation
 from shear_plate_ideal import shear_plate
 
+# cmap='gist_yarg'
 cmap='twilight'
 crop_idn = 25
+fig_size = (8,8)
 
 # ideal case
 oap_f = 101.6
@@ -25,8 +27,10 @@ wf_error = 0  # d_theta*oap_f*np.tan(oap_alpha/2) / (8 * oap_F**2 * np.sqrt(6)) 
 rot_angle = 0.0  # in degrees
 ideal_pattern = shear_plate(Rc=1.e10, atype='oap', wfe=wf_error, wfe_phi=rot_angle)
 
-plt.imshow(ideal_pattern.T[crop_idn:-crop_idn, crop_idn:-crop_idn], cmap=cmap)
-plt.tight_layout()
+fig_ideal, ax_ideal = plt.subplots(figsize=fig_size)
+ax_ideal.imshow(ideal_pattern.T[crop_idn:-crop_idn, crop_idn:-crop_idn], cmap=cmap)
+ax_ideal.axis('off')
+fig_ideal.tight_layout()
 
 
 # defocus case
