@@ -112,17 +112,22 @@ aperture = np.ma.masked_array(aperture, mask=aperture > D/2)
 from shear_plate_ideal import shear_plate
 
 
+# ideal case
 oap_f = 101.6
 oap_F = 4
 oap_alpha = np.radians(45)
 d_theta = np.radians(0.1)
 test_wavelength = 632.8e-6  # HeNe laser wavelength in mm
-wf_error = d_theta*oap_f*np.tan(oap_alpha/2) / (8 * oap_F**2 * np.sqrt(6)) * np.sqrt(1) / test_wavelength
+wf_error = 0  # d_theta*oap_f*np.tan(oap_alpha/2) / (8 * oap_F**2 * np.sqrt(6)) * np.sqrt(1) / test_wavelength
 
 rot_angle = 0.0  # in degrees
 pattern = shear_plate(Rc=1.e10, atype='oap', wfe=wf_error, wfe_phi=rot_angle)
 
-plt.imshow(pattern.T)
+crop_idn = 25
+plt.imshow(pattern.T[crop_idn:-crop_idn, crop_idn:-crop_idn], cmap='grey')
+plt.tight_layout()
+
+# defocus case
 
 
 # end of Nat's aberration txt
