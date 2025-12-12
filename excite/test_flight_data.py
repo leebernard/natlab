@@ -93,10 +93,11 @@ dir_list = dir_list[:-23]
 # last_ax.imshow(test_data[-1])
 # test_fig.tight_layout()
 
-
-flight_list = dir_list[1096:]  # quick and dirty removeal of the ground data.
+# quick and dirty removal of the ground data.
+flight_list = dir_list[1096:]
+# then identify the data from ascent, and remove
 i_ascent = [i for i, str in enumerate(flight_list) if 'ascent' in str]
-float_list = flight_list[i_ascent[-1]+1:]
+float_list = flight_list[i_ascent[-1]+1:]  # this should be the fits files acquired during float operations
 
 
 '''
