@@ -69,6 +69,18 @@ def shear_plate(Rc, R, eps, Rs, alpha=45, plate=-1, T=18.0, wedge_ang=6.35, n_id
     ty = y.T + x0
     print(f"Image pixel scale: {R0*2/(N-1)}")
 
+    # Shift x-coords of the beam, to keep zero at the center of the simulation
+    x += shear/2
+    # Generate the sheared reflected beam
+    xp = x - shear
+    yp = y + theta*Rs
+    # calculate the combined phase at the observation plane for defocus
+    phase0 = pi*(shear**2 + (theta*Rs)**2) / (lam*Rc)
+    phase = 2*pi/lam*( (theta*(1.-Rs/Rc))*y + (shear/Rc)*x ) - phase0
+
+
+
+
 
 
 
