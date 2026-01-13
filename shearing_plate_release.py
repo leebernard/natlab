@@ -78,8 +78,17 @@ def shear_plate(Rc, R, eps, Rs, alpha=45, plate=-1, T=18.0, wedge_ang=6.35, n_id
     phase0 = pi*(shear**2 + (theta*Rs)**2) / (lam*Rc)
     phase = 2*pi/lam*( (theta*(1.-Rs/Rc))*y + (shear/Rc)*x ) - phase0
 
+    # give the rays some abberations
+    # if ()
 
+    # calculate the patter
+    R1, R2 = R, R
+    good = (x/R1)**2 + (y/R2)**2 <= 1
 
+    # mask the central obscuration, if present
+    if (eps>0):
+        good[(x/(R1*eps))**2 + (y/(R2*eps))**2 <= 1] = False
+    nx = int(round(shear / (x0[1] - x0[0])))
 
 
 
