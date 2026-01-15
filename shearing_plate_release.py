@@ -114,5 +114,5 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     # convert phase to intensity
     s = 0.25*(norm1**2 + norm2**2) - 0.5*norm1*norm2*cos(phase)
 
-
+    return s
 
