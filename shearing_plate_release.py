@@ -13,9 +13,9 @@ This version is intended for release to the public domain as open source softwar
 
 """
 
-from numpy import arange, zeros, ones, sqrt, sin, cos, round, pi, arctan2, sign, exp, ceil
+from numpy import arange, zeros, ones, sqrt, sin, cos, round, pi, arctan2, sign, exp, ceil, mean, diff
 
-def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=18.0, wedge_ang=6.35, n_idx=1.46, lam=632.8e-6, atype='coma', wfe=0, wfe_phi=0, acenter=[0., 0.], N=203):
+def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=6.35, wedge_ang=18., n_idx=1.46, lam=632.8e-6, atype='coma', wfe=0, wfe_phi=0, acenter=[0., 0.], N=203):
     """
 
     Parameters
@@ -42,9 +42,9 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     """
 
     # default shearing plate geometry's. This will over-ride passed parameters
-    if (plate==0): Dmax, wedge_ang, T = 15., 10., 13.
+    if (plate==0): Dmax, wedge_ang, T = 15., 10., 2.6
     if (plate==1): Dmax, wedge_ang, T = 36., 18., 6.35
-    if (plate==2): Dmax, wedge_ang, T = 70., 40., 2.6
+    if (plate==2): Dmax, wedge_ang, T = 70., 40., 13.
     print("beam radius:", D)
     print("Radius of curvature:", Rc)
 
@@ -65,12 +65,12 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
 
     # create some starting ray positions
     D0 = Dmax + int(ceil(shear))
-    x0 = (arange(N) - (N-1)/2) * D0 * 2/(N-1)
+    x0 = (arange(N) - (N-1)/2) * D0 * 1/(N-1)
     # create the primary beam, shifting it so the center of the shearing pattern is zero
     x = zeros((N, N), dtype='float32') + x0 + shear/2
     y = zeros((N, N), dtype='float32')
-    ty = y.T + x0
-    print (f"Image size: {D0*N/(N-1):.2f} (pixel scale: {D0/(N-1):.3f})")
+    yt = y.T; yt += x0
+    print (f"Image size: {x.max()-x.min():.2f}x{y.max()-y.min()} (pixel scale: {mean(diff(x)):.3f})")
 
     # Generate the sheared reflected beam
     xp = x - shear
@@ -94,7 +94,7 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
         R2 = D/2
     else:
         R2 = Dmax/2*cos(alpha)
-
+    print("R1, R2:", R1, R2)
 
     # mask the aperture
     aperture_mask = (x/R1)**2 + (y/R2)**2 > 1
@@ -103,6 +103,7 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
         aperture_mask[(x/(R1*eps))**2 + (y/(R2*eps))**2 <= 1] = True
     norm1 = ones(x.shape)
     norm1[aperture_mask] = 0
+    print("shape of norm1", norm1.shape)
 
     # and again for the sheared beam
     aperture_mask = ((x - shear)/R1)**2 + (y/R2)**2 > 1

@@ -109,8 +109,13 @@ aperture = np.ma.masked_array(aperture, mask=aperture > D/2)
 
 
 # play around with oap rotation
-from shear_plate_ideal import shear_plate
+# from shear_plate_ideal import shear_plate
+from shearing_plate_release import shear_plate
+import matplotlib.pyplot as plt
 
+test_s = shear_plate()
+plt.imshow(test_s)
+plt.show()
 
 # ideal case
 oap_f = 101.6
