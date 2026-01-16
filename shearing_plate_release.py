@@ -32,7 +32,7 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     n_idx: index of refraction of the shearing plate glass
     lam: wavelength of the beam of light
     atype: option for choosing which wavefront aberration to display
-    wfe: magnitude of the wavefront error due to aberration
+    wfe: magnitude of the wavefront error (rms, in units of wavelength) due to aberration
     wfe_phi: angle of the wavefront error in the cross-plane
     N: Parameter controlling resolution of the sample. Number of rays generated is NxN
 
@@ -78,8 +78,15 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     # calculate the combined phase at the observation plane for defocus
     phase = 2*pi/lam*( (theta*(1.-Rs/Rc))*y + (shear/Rc)*x ) - pi*(shear**2 + (theta*Rs)**2) / (lam*Rc)
 
-    # give the rays some abberations
-    # if ()
+    # give the rays some aberrations
+    if (wfe>0):
+        if (atype=='sa'):
+            w_pv = wfe*1.5*sqrt(5)  # convert rms to peak to valley (same as 1/0.298)
+            delta_w = w_pv*(x**2 + y**2)**2 / Rw**4
+            delta_wp = w_pv*(xp**2 + yp**2)**2 / Rw**4
+            phase += 2*pi * (delta_w - delta_wp)
+        # if (atype=='coma'):
+
 
     # calculate the pattern
     # set the outer radius of the reflected beams
