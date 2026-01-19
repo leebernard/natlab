@@ -79,14 +79,34 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     phase = 2*pi/lam*( (theta*(1.-Rs/Rc))*y + (shear/Rc)*x ) - pi*(shear**2 + (theta*Rs)**2) / (lam*Rc)
 
     # give the rays some aberrations
-    if (wfe>0):
-        if (atype=='sa'):
+    if wfe>0:
+        if atype=='sa':
+            eps_fac = (1-eps**2)*sqrt( 1 + eps**2*(eps**2+7/4) )
             w_pv = wfe*1.5*sqrt(5)  # convert rms to peak to valley (same as 1/0.298)
-            delta_w = w_pv*(x**2 + y**2)**2 / Rw**4
-            delta_wp = w_pv*(xp**2 + yp**2)**2 / Rw**4
-            phase += 2*pi * (delta_w - delta_wp)
-        # if (atype=='coma'):
-
+            delta_w = (x**2 + y**2)**2 / Rw**4  # calculate the path length map of beam 1
+            delta_wp = (xp**2 + yp**2)**2 / Rw**4  # and for beam 2
+            W = w_pv*(delta_w - delta_wp)/eps_fac  # now combine the two, and calculate the magnitude
+        elif atype=='coma':
+            eps_fac = sqrt( 1 + eps**2 + eps**4 + eps**6 )
+            w_pv = wfe
+            delta_w = x(x**2 + y**2) / Rw**3
+            delta_wp = xp(xp**2 + yp**2) / Rw**3
+            W = w_pv*(delta_w - delta_wp)/eps_fac
+        elif atype=='asti':
+            eps_fac = 1
+            w_pv = wfe*4
+            delta_w = x**2/Rw**2
+            delta_wp = xp**2/Rw**2
+            W = w_pv*(delta_w - delta_wp)/eps_fac
+        elif atype=='oap':
+            eps_fac = 1
+            w_pv = wfe
+            delta_w = (x**2 - y**2)/Rw**2
+            delta_wp = (xp**2 - yp**2)/Rw**2
+            W = w_pv*(delta_w - delta_wp)/eps_fac
+        else:
+            W = 0
+        phase += 2*pi * W  # now convert path length to a phase map
 
     # calculate the pattern
     # set the outer radius of the reflected beams
