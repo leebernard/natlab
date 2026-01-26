@@ -157,10 +157,10 @@ def shear_plate(Rc=1.e5,D=25.4,Dmax=36.,eps=0.,Rs=50.,T=6.35,wedge_ang=18.,N=203
 
     if (visual):
         s *= 1 + randn(N,N)/10.
-        s -= s.min()
-        x = (s/s.max())**(1./2.2)
-        x[N//2-1:N//2+1,:]=0
-        s = zeros((N,N,3),dtype='float32')
+        s -= s.min()  # this is redundant: s.min() will always be zero, due to aperture masking
+        x = (s/s.max())**(1./2.2)  # gamma correction
+        x[N//2-1:N//2+1,:]=0  # add a horizontal black line
+        s = zeros((N,N,3),dtype='float32')  # convert to an RGB image
         s[:,:,0] = x
 
     return s
