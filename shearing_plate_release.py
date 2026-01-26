@@ -14,8 +14,10 @@ This version is intended for release to the public domain as open source softwar
 """
 
 from numpy import arange, zeros, ones, sqrt, sin, cos, round, pi, arctan2, sign, exp, ceil, mean, diff
+from numpy.random import randn
 
-def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=6.35, wedge_ang=18., n_idx=1.46, lam=632.8e-6, atype='coma', wfe=0, wfe_phi=0, acenter=[0., 0.], N=203):
+
+def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=6.35, wedge_ang=18., n_idx=1.46, lam=632.8e-6, atype='coma', wfe=0, wfe_phi=0, acenter=[0., 0.], N=203, visual=True):
     """
 
     Parameters
@@ -145,5 +147,8 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     # convert phase to intensity
     s = 0.25*(norm1**2 + norm2**2) - 0.5*norm1*norm2*cos(phase)
 
+    if visual:
+        s *= 1 + randn(N, N)/10  # add some noise, to simulate laser speckle
+        s = (s/s.max())**(1/2.2)  # gamma correction
     return s
 
