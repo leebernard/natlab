@@ -85,7 +85,14 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
         cos_fac, sin_fac = cos(wfe_phi*pi/180), sin(wfe_phi*pi/180)
         x1, y1 = (x - acenter[0])*cos_fac + (y - acenter[1])*sin_fac, -(x - acenter[0])*sin_fac + (y - acenter[1])*cos_fac
         xp1, yp1 = (xp - acenter[0])*cos_fac + (yp - acenter[1])*sin_fac, -(xp - acenter[0])*sin_fac + (yp - acenter[1])*cos_fac
-        if atype=='sa':
+        if atype=='defocus':
+            print("Calculating defocus error...")
+            eps_fac = 1-eps**2
+            w_pv = 2*sqrt(3)*wfe
+            delta_w = (x1**2 + y1**2) / Rw**2
+            delta_wp = (xp1**2 + yp1**2) / Rw**2
+            W = w_pv*(delta_w - delta_wp)/eps_fac
+        elif atype=='sa':
             eps_fac = (1-eps**2)*sqrt( 1 + eps**2*(eps**2+7/4) )
             w_pv = wfe*1.5*sqrt(5)  # convert rms to peak to valley (same as 1/0.298)
             delta_w = (x1**2 + y1**2)**2 / Rw**4  # calculate the path length map of beam 1
@@ -93,9 +100,9 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
             W = w_pv*(delta_w - delta_wp)/eps_fac  # now combine the two, and calculate the magnitude
         elif atype=='coma':
             eps_fac = sqrt( 1 + eps**2 + eps**4 + eps**6 )
-            w_pv = wfe
-            delta_w = x1(x1**2 + y1**2) / Rw**3
-            delta_wp = xp1(xp1**2 + yp1**2) / Rw**3
+            w_pv = wfe*2**1.5
+            delta_w = x1*(x1**2 + y1**2) / Rw**3
+            delta_wp = xp1*(xp1**2 + yp1**2) / Rw**3
             W = w_pv*(delta_w - delta_wp)/eps_fac
         elif atype=='asti':
             eps_fac = 1
@@ -104,8 +111,8 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
             delta_wp = xp1**2/Rw**2
             W = w_pv*(delta_w - delta_wp)/eps_fac
         elif atype=='oap':
-            eps_fac = 1
-            w_pv = wfe
+            eps_fac = sqrt(1 + eps**2 + eps**4)
+            w_pv = wfe*sqrt(6)
             delta_w = (x1**2 - y1**2)/Rw**2
             delta_wp = (xp1**2 - yp1**2)/Rw**2
             W = w_pv*(delta_w - delta_wp)/eps_fac
