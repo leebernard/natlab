@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 from shearing_plate_release import shear_plate
 
 # cmap='gist_yarg'
-cmap='inferno'
-crop_idn = 25
+cmap='gist_heat'
+crop_idn = 20
 fig_size = (8,8)
 
 # ideal case
