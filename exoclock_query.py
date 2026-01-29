@@ -31,6 +31,7 @@ print(tepcat_table.colnames)
 exoclock_system_names = ' '.join(exoclock_planets.keys())
 excite_target_systems = tepcat_table['System']
 
+# check how many EXCITE targets are in the ExoClock list
 # regular expression pattern
 is_leading_0 = re.compile(r'(?<![0-9])0')
 for target_system in excite_target_systems:
@@ -41,5 +42,16 @@ for target_system in excite_target_systems:
     target_system = re.sub(is_leading_0, '', target_system)
     print('After removing characters:', target_system)
     print('Is in exoclock?', target_system in exoclock_system_names)
+
+# Now pull the locations where ExoClock has EXCITE targets
+excite_keys = []
+for target_system in excite_target_systems:
+    target_system = target_system.replace('_', '')
+    target_system = re.sub(is_leading_0, '', target_system)
+    print('EXCITE target name after removing characters:', target_system)
+    exoclock_sys = [system for system in exoclock_planets.keys() if target_system in system]
+    print(exoclock_sys)
+    if exoclock_sys:
+        excite_keys.append(exoclock_sys[0])
 
 
