@@ -36,13 +36,14 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     atype: option for choosing which wavefront aberration to display
     wfe: magnitude of the wavefront error (rms, in units of wavelength) due to aberration
     wfe_phi: angle of the wavefront error in the cross-plane
+    acenter: offset of the wavefront aberration center from the beam center
     N: Parameter controlling resolution of the sample. Number of rays generated is NxN
+    visual: Flag. If True, the simulation adds some noise and gamma correction to the simulated data
 
     Returns
     -------
-
+    A numpy array containing a simulated image of the viewing plane of the lateral shearing plate interference pattern.
     """
-
     # default shearing plate geometry's. This will over-ride passed parameters
     if (plate==0): Dmax, wedge_ang, T = 15., 10., 2.6
     if (plate==1): Dmax, wedge_ang, T = 36., 18., 6.35
