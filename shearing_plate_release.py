@@ -1,7 +1,7 @@
 """
 Module for simulating the interference pattern of a linear shearing interferometer.
-This code is based upon the Thorlabs shearing plate interferometer. This plate comes in several sizes, with the
-model number and specs given below.
+This code is based upon the Thorlabs shearing plate interferometer. This plate comes in several
+sizes, with the model number and specs given below.
 
 SI254P: 10-25.4 mm beam diameter (R=21.5), ang=18, T=6.35 (plate=0)
 SI100P: 5-10 mm beam diameter (R=11.), ang=40, T=2.6 (plate=1)
@@ -13,11 +13,13 @@ This version is intended for release to the public domain as open source softwar
 
 """
 
-from numpy import arange, zeros, ones, sqrt, sin, cos, round, pi, arctan2, sign, exp, ceil, mean, diff
+from numpy import arange, zeros, ones, sqrt, sin, cos, pi, arctan2, sign, ceil, mean, diff
 from numpy.random import randn
 
 
-def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=6.35, wedge_ang=18., n_idx=1.46, lam=632.8e-6, atype='coma', wfe=0, wfe_phi=0, acenter=[0., 0.], N=203, visual=True):
+def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=6.35, wedge_ang=18.,
+                n_idx=1.46, lam=632.8e-6, atype='coma', wfe=0, wfe_phi=0, acenter=[0., 0.], N=203,
+                visual=True):
     """
 
     Parameters
@@ -42,7 +44,8 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
 
     Returns
     -------
-    A numpy array containing a simulated image of the viewing plane of the lateral shearing plate interference pattern.
+    A numpy array containing a simulated image of the viewing plane of the lateral shearing plate
+    interference pattern.
     """
     # default shearing plate geometry's. This will over-ride passed parameters
     if (plate==0): Dmax, wedge_ang, T = 15., 10., 2.6
@@ -84,8 +87,10 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     # give the rays some aberrations
     if wfe>0:
         cos_fac, sin_fac = cos(wfe_phi*pi/180), sin(wfe_phi*pi/180)
-        x1, y1 = (x - acenter[0])*cos_fac + (y - acenter[1])*sin_fac, -(x - acenter[0])*sin_fac + (y - acenter[1])*cos_fac
-        xp1, yp1 = (xp - acenter[0])*cos_fac + (yp - acenter[1])*sin_fac, -(xp - acenter[0])*sin_fac + (yp - acenter[1])*cos_fac
+        x1 = (x - acenter[0])*cos_fac + (y - acenter[1])*sin_fac
+        y1 = -(x - acenter[0])*sin_fac + (y - acenter[1])*cos_fac
+        xp1= (xp - acenter[0])*cos_fac + (yp - acenter[1])*sin_fac
+        yp1 = -(xp - acenter[0])*sin_fac + (yp - acenter[1])*cos_fac
         if atype=='defocus':
             print("Calculating defocus error...")
             eps_fac = 1-eps**2
