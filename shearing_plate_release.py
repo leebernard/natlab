@@ -1,14 +1,16 @@
 """
-Module for simulating the interference pattern of a linear shearing interferometer.
-This code is based upon the Thorlabs shearing plate interferometer. This plate comes in several
-sizes, with the model number and specs given below.
+Module for simulating the interference pattern of a linear shearing
+interferometer. This code is based upon the Thorlabs shearing plate
+interferometer. This plate comes in several sizes, with the model number
+and specs given below.
 
 SI254P: 10-25.4 mm beam diameter (R=21.5), ang=18, T=6.35 (plate=0)
 SI100P: 5-10 mm beam diameter (R=11.), ang=40, T=2.6 (plate=1)
 SI500P: 25.4-50 mm beam diameter (R=30.), ang=10, T=13 (plate=2)
                 Note, R is more like 70-80.
 
-This version is intended for release to the public domain as open source software.
+This version is intended for release to the public domain as open source
+software.
 
 
 """
@@ -17,9 +19,9 @@ from numpy import arange, zeros, ones, sqrt, sin, cos, pi, arctan2, sign, ceil, 
 from numpy.random import randn
 
 
-def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=6.35, wedge_ang=18.,
-                n_idx=1.46, lam=632.8e-6, atype='coma', wfe=0, wfe_phi=0, acenter=[0., 0.], N=203,
-                visual=True):
+def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1,
+                T=6.35, wedge_ang=18., n_idx=1.46, lam=632.8e-6, atype='coma',
+                wfe=0, wfe_phi=0, acenter=[0., 0.], N=203, visual=True):
     """
 
     Parameters
@@ -27,7 +29,8 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     Rc: radius of curvature of the wavefront
     D: Diameter of the beam (in the crossplane direction)
     Dmax: Diameter of the shearing plate. This also sets the image size
-    eps: fraction of central obscuration, assuming a centered, circular obscuration.
+    eps: fraction of central obscuration, assuming a centered, circular
+        obscuration.
     Rs: Distance from the shearing plate to the observation plane
     alpha: angle of incidence of the beam upon the shearing plate
     plate: option for a preset shearing plate geometry
@@ -36,16 +39,19 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     n_idx: index of refraction of the shearing plate glass
     lam: wavelength of the beam of light
     atype: option for choosing which wavefront aberration to display
-    wfe: magnitude of the wavefront error (rms, in units of wavelength) due to aberration
+    wfe: magnitude of the wavefront error (rms, in units of wavelength)
+        due to aberration
     wfe_phi: angle of the wavefront error in the cross-plane
     acenter: offset of the wavefront aberration center from the beam center
-    N: Parameter controlling resolution of the sample. Number of rays generated is NxN
-    visual: Flag. If True, the simulation adds some noise and gamma correction to the simulated data
+    N: Parameter controlling resolution of the sample. Number of rays
+        generated is NxN
+    visual: Flag. If True, the simulation adds some noise and gamma
+        correction to the simulated data
 
     Returns
     -------
-    A numpy array containing a simulated image of the viewing plane of the lateral shearing plate
-    interference pattern.
+    A numpy array containing a simulated image of the viewing plane of
+    the lateral shearing plate interference pattern.
     """
     # default shearing plate geometry's. This will over-ride passed parameters
     if (plate==0): Dmax, wedge_ang, T = 15., 10., 2.6
@@ -72,17 +78,20 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
     # create some starting ray positions
     D0 = Dmax + int(ceil(shear))
     x0 = (arange(N) - (N-1)/2) * D0 * 1/(N-1)
-    # create the primary beam, shifting it so the center of the shearing pattern is zero
+    # create the primary beam, shifting it so the center of the shearing
+    # pattern is zero
     x = zeros((N, N), dtype='float32') + x0 + shear/2
     y = zeros((N, N), dtype='float32')
     yt = y.T; yt += x0
-    print (f"Image size: {x.max()-x.min():.2f}x{y.max()-y.min()} (pixel scale: {mean(diff(x)):.3f})")
+    print(f"Image size: {x.max()-x.min():.2f}x{y.max()-y.min()} "
+          f"(pixel scale: {mean(diff(x)):.3f})")
 
     # Generate the sheared reflected beam
     xp = x - shear
     yp = y + theta*Rs
     # calculate the combined phase at the observation plane for defocus
-    phase = 2*pi/lam*( (theta*(1.-Rs/Rc))*y + (shear/Rc)*x ) - pi*(shear**2 + (theta*Rs)**2) / (lam*Rc)
+    phase = 2*pi/lam*((theta*(1.-Rs/Rc))*y + (shear/Rc)*x) - \
+            pi*(shear**2 + (theta*Rs)**2)/(lam*Rc)
 
     # give the rays some aberrations
     if wfe>0:
@@ -100,10 +109,14 @@ def shear_plate(Rc=1.e5, D=25.4, Dmax=36.0, eps=0, Rs=50, alpha=45, plate=-1, T=
             W = w_pv*(delta_w - delta_wp)/eps_fac
         elif atype=='sa':
             eps_fac = (1-eps**2)*sqrt( 1 + eps**2*(eps**2+7/4) )
-            w_pv = wfe*1.5*sqrt(5)  # convert rms to peak to valley (same as 1/0.298)
-            delta_w = (x1**2 + y1**2)**2 / Rw**4  # calculate the path length map of beam 1
-            delta_wp = (xp1**2 + yp1**2)**2 / Rw**4  # and for beam 2
-            W = w_pv*(delta_w - delta_wp)/eps_fac  # now combine the two, and calculate the magnitude
+            # convert rms to peak to valley (same as 1/0.298)
+            w_pv = wfe*1.5*sqrt(5)
+            # calculate the path length map of beam 1
+            delta_w = (x1**2 + y1**2)**2 / Rw**4
+            # and for beam 2
+            delta_wp = (xp1**2 + yp1**2)**2 / Rw**4
+            # combine the two, and calculate the magnitude
+            W = w_pv*(delta_w - delta_wp)/eps_fac
         elif atype=='coma':
             eps_fac = sqrt( 1 + eps**2 + eps**4 + eps**6 )
             w_pv = wfe*2**1.5
