@@ -1,5 +1,8 @@
 """
-This script is for accessing the ExoClock database, and comparing it to EXCITE's target list.
+This script is for accessing the ExoClock database, and pulling exoplanet data
+for EXCITE's target list.
+
+
 
 ExoClock:
 https://www.exoclock.space/database/planets
@@ -13,6 +16,8 @@ import re
 
 # from astropy.io import ascii
 from astropy.table import Table
+
+verbose = True
 
 exoclock_planets = json.loads(urllib.request.urlopen('https://www.exoclock.space/database/planets_json').read())
 
@@ -35,23 +40,29 @@ excite_target_systems = tepcat_table['System']
 # regular expression pattern
 is_leading_0 = re.compile(r'(?<![0-9])0')
 for target_system in excite_target_systems:
-    print(target_system)
+    if verbose:
+        print(target_system)
     # print(type(target_system))
     # strip underscore characters
     target_system = target_system.replace('_', '')
     target_system = re.sub(is_leading_0, '', target_system)
-    print('After removing characters:', target_system)
-    print('Is in exoclock?', target_system in exoclock_system_names)
+    if verbose:
+        print('After removing characters:', target_system)
+        print('Is in exoclock?', target_system in exoclock_system_names)
 
 # Now pull the locations where ExoClock has EXCITE targets
 excite_keys = []
 for target_system in excite_target_systems:
     target_system = target_system.replace('_', '')
     target_system = re.sub(is_leading_0, '', target_system)
-    print('EXCITE target name after removing characters:', target_system)
+    if verbose:
+        print('EXCITE target name after removing characters:', target_system)
     exoclock_sys = [system for system in exoclock_planets.keys() if target_system in system]
     print(exoclock_sys)
     if exoclock_sys:
         excite_keys.append(exoclock_sys[0])
+
+excite_target_ephemeris = [exoclock_planets[excite_key] for excite_key in excite_keys]
+
 
 

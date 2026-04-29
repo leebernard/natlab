@@ -70,7 +70,7 @@ print('output angle at minimum deviation, 1.00 um:', np.degrees(beta_min), 'degr
 
 beta_max = output_angle(n_850, alpha=alpha_min)
 dispersion_angle = beta_min - beta_max
-print('total angle of dispersion for 1.00-3.50 um:', np.degrees(dispersion_angle))
+print('total angle of dispersion for 0.85-3.50 um:', np.degrees(dispersion_angle))
 
 
 

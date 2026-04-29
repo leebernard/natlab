@@ -15,7 +15,8 @@ software.
 
 """
 
-from numpy import arange, zeros, ones, sqrt, sin, cos, pi, arctan2, sign, ceil, mean, diff
+from numpy import arange, zeros, ones
+from numpy import sqrt, sin, cos, pi, arctan2, sign, ceil, mean, diff
 from numpy.random import randn
 
 
