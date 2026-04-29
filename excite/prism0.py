@@ -56,9 +56,9 @@ ps=18.e-6  # H2RG pixel size in m
 x_px = F2*dtheta_dl.cumsum()*(l[1]-l[0]) / ps
 x_um = F2*dtheta_dl.cumsum()*(l[1]-l[0])*1e6
 
-wl_soln = np.stack((l, x_um), axis=1)
+wl_soln = np.stack((l, x_um, x_px), axis=1)
 
-save_location = '/home/lee/natlab/excite_optic_data/'
+save_location = '/home/lee/nat_lab/excite_mission/excite_optic_data'
 np.savetxt(save_location+'wavelength_soln.dat', wl_soln, delimiter=',')
 
 # reflection losses? 
@@ -84,3 +84,19 @@ Rp1 = ( np.tan(theta0-theta0p)/np.tan(theta0+theta0p) )**2
 Rs2 = ( -np.sin(theta1p-theta1)/np.sin(theta1+theta1p) )**2
 Rp2 = ( np.tan(theta1p-theta1)/np.tan(theta1p+theta1) )**2
 T = (1-0.5*(Rs1+Rp1))*(1-0.5*(Rs2+Rp2))
+
+
+# """Make some plots"""
+#
+# import matplotlib.pyplot as plt
+#
+# r_fig, r_ax = plt.subplots()
+# r_ax.plot(l, R)
+# r_ax.set_xlabel("Wavelength (um)")
+# r_ax.set_ylabel("Resolution (lambda/Delta_lambda)")
+#
+#
+# fig_wl_soln, ax_wl_soln = plt.subplots()
+# ax_wl_soln.plot(x_px, l)
+# ax_wl_soln.set_xlabel("Pixel position")
+# ax_wl_soln.set_ylabel("wavelength (um)")
